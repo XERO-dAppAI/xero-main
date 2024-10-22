@@ -1,0 +1,36 @@
+{
+  "canisters": {
+    "inventory":{
+      "package": "inventory",
+      "type": "rust",
+      "source": ["./src/inventory"],
+      "candid": "./src/inventory/inventory.did"
+    },
+    
+    "data_aggregator":{
+      "package": "data_aggregator",
+      "type": "rust",
+      "source": ["./src/data_aggregator/data_aggregator.did"],
+      "candid": "./src/data_aggregator/data_aggregator.did"
+    },
+
+    "xero_frontend": {
+      "dependencies": [
+        "inventory"
+      ],
+      "source": [
+        "src/xero_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "xero_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
