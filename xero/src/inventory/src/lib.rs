@@ -22,7 +22,6 @@ impl InventoryItem {
 }
 
 
-
 use std::collections::HashMap; // Import HashMap, which is like our storage system for items
 
 // Define the structure to manage the entire inventory
