@@ -1,0 +1,11 @@
+service : {
+    add_inventory_item: (nat32, text, nat32, nat64) -> ();               // Adds a new item to the inventory
+    get_inventory_item: (nat32) -> (opt record {                         // Retrieves an item by ID
+        id: nat32;                                                       // ID of the item
+        name: text;                                                      // Name of the item
+        quantity: nat32;                                                 // Quantity of the item in stock
+        expiration_date: nat64;                                          // Expiration date as a UNIX timestamp
+    });
+    update_inventory_quantity: (nat32, nat32) -> ();                     // Updates the quantity of an item by ID
+    remove_inventory_item: (nat32) -> ();                                // Removes an item from the inventory
+}
