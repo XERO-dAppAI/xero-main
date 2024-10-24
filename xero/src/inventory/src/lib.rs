@@ -1,11 +1,11 @@
-// Import necessary libraries for serialization, deserialization, and canister functionality.
-use ic_cdk_macros::{update, query};  // Import macros to define update and query methods for the canister
-use candid::{CandidType, Deserialize}; // Import CandidType and Deserialize to enable serialization for IC canisters
-use serde::{Serialize}; // Import Serialize from serde for standard Rust serialization
-use std::collections::HashMap; // Import HashMap, a key-value store to manage the inventory
+// Import necessary libraries for serialization, deserialization, and canister functionality
+use ic_cdk_macros::{update, query};
+use ic_cdk::export::candid::{CandidType, Deserialize}; // Ensure CandidType is from ic_cdk's candid
+use serde::{Serialize};
+use std::collections::HashMap;
+td::collections::HashMap; // HashMap to store inventory items by their ID
 
 // Define the structure for an inventory item
-// The InventoryItem struct represents an individual item in the inventory.
 #[derive(Serialize, Deserialize, CandidType, Clone, Debug)]
 pub struct InventoryItem {
     pub id: u32,               // Unique identifier for the item
@@ -14,13 +14,12 @@ pub struct InventoryItem {
     pub expiration_date: u64,  // Expiration date stored as a UNIX timestamp
 }
 
-// Define the structure that will manage the entire inventory system.
-// This struct will store all the items in a HashMap, where each item is identified by its ID.
+// Define the structure that manages the entire inventory system
 pub struct InventoryManager {
     pub items: HashMap<u32, InventoryItem>,  // Store items by their unique ID
 }
 
-// Implement functions for InventoryManager to manage inventory items (add, get, update, and remove)
+// Implement functions for InventoryManager to manage inventory items (add, get, update, remove)
 impl InventoryManager {
     // Create a new inventory system with empty storage (an empty HashMap)
     pub fn new() -> Self {
@@ -57,8 +56,7 @@ thread_local! {
     static INVENTORY_MANAGER: std::cell::RefCell<InventoryManager> = std::cell::RefCell::new(InventoryManager::new());
 }
 
-// Expose the function to add a new item to the inventory as an `update` method.
-// This function can be called externally to add items to the inventory.
+// Expose the function to add a new item to the inventory as an `update` method
 #[update]
 fn add_inventory_item(id: u32, name: String, quantity: u32, expiration_date: u64) {
     let item = InventoryItem {
@@ -68,36 +66,31 @@ fn add_inventory_item(id: u32, name: String, quantity: u32, expiration_date: u64
         expiration_date,
     };
 
-    // Store the new item in the inventory
     INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().add_item(item);
+        inventory.borrow_mut().add_item(item); // Add the item to the inventory manager
     });
 }
 
-// Expose the function to retrieve an item from the inventory as a `query` method.
-// This allows external callers to retrieve item details by item ID.
+// Expose the function to retrieve an item from the inventory as a `query` method
 #[query]
 fn get_inventory_item(id: u32) -> Option<InventoryItem> {
-    // Clone the item to return it since the query function needs to return a value
     INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow().get_item(id).cloned()
+        inventory.borrow().get_item(id).cloned() // Clone the item to return it
     })
 }
 
-// Expose the function to update the quantity of an existing inventory item as an `update` method.
-// External callers can change the quantity of an item using this function.
+// Expose the function to update the quantity of an existing inventory item as an `update` method
 #[update]
 fn update_inventory_quantity(id: u32, quantity: u32) {
     INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().update_item_quantity(id, quantity);
+        inventory.borrow_mut().update_item_quantity(id, quantity); // Update the item's quantity
     });
 }
 
-// Expose the function to remove an item from the inventory as an `update` method.
-// External callers can remove an item from the inventory using this function.
+// Expose the function to remove an item from the inventory as an `update` method
 #[update]
 fn remove_inventory_item(id: u32) {
     INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().remove_item(id);
+        inventory.borrow_mut().remove_item(id); // Remove the item from the inventory manager
     });
 }
