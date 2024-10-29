@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { xero_backend } from 'declarations/xero_backend';
+import { inventory } from 'declarations/inventory';
 
 function App() {
   const [greeting, setGreeting] = useState('');
@@ -7,7 +7,7 @@ function App() {
   function handleSubmit(event) {
     event.preventDefault();
     const name = event.target.elements.name.value;
-    xero_backend.greet(name).then((greeting) => {
+    inventory.greet(name).then((greeting) => {
       setGreeting(greeting);
     });
     return false;

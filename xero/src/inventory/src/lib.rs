@@ -2,7 +2,7 @@ use ic_cdk_macros::{update, query};
 use serde::{Serialize, Deserialize};
 use candid::CandidType;
 use std::collections::HashMap;
-use chrono::{DateTime, Utc};
+use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 
 #[derive(Serialize, Deserialize, CandidType, Clone, Debug)]
 pub struct InventoryItem {
@@ -27,8 +27,8 @@ impl InventoryManager {
 
     // Helper function to get the current timestamp as a string
     pub fn get_current_time() -> String {
-        let now: DateTime<Utc> = Utc::now();
-        now.format("%Y-%m-%d %H:%M:%S").to_string()
+        let now = OffsetDateTime::now_utc();
+        now.format(&Rfc3339).unwrap_or_else(|_| "Invalid time".to_string())
     }
 
     pub fn add_item(&mut self, item: InventoryItem) {
