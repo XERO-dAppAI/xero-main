@@ -12,7 +12,9 @@ candid = "0.8"
 chrono = "0.4"  # Added for time logging
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
 
 [target.wasm32-unknown-unknown]
-linker = "rust-lld"
+linker = "wasm-ld"
+
