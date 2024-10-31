@@ -203,6 +203,14 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 [[package]]
 name = "data_aggregator"
 version = "0.1.0"
+dependencies = [
+ "candid",
+ "ic-cdk",
+ "ic-cdk-macros",
+ "serde",
+ "serde_json",
+ "time",
+]
 
 [[package]]
 name = "deranged"

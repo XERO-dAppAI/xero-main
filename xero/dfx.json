@@ -7,6 +7,15 @@
             "candid": "./src/inventory/inventory.did"
         },
 
+        "data_aggregator":{
+            "data_aggregator":{
+                "package": "data_aggregator",
+                "type": "rust",
+                "source": ["./src/data_aggregator"],
+                "candid": "./src/data_aggregator/data_aggregator.did"
+            }
+        },
+
         "xero_frontend": {
             "dependencies": [
                 "inventory"
