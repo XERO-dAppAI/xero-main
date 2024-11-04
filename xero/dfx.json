@@ -12,6 +12,12 @@
             "source": ["./src/data_aggregator"],
             "candid": "./src/data_aggregator/data_aggregator.did"
         },
+        "ledger":{
+            "package": "ledger",
+            "type": "rust",
+            "source": ["./src/ledger"],
+            "candid": "./src/ledger/ledger.did"
+        },
       
 
         "xero_frontend": {

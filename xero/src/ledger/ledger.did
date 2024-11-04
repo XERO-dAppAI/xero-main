@@ -1,0 +1,17 @@
+service : {
+  add_transaction: (text, text, text, text) -> (variant { Ok: text; Err: text });
+  get_transaction: (text) -> (variant { Ok: record {
+    transaction_id: text;
+    timestamp: nat64;
+    action_type: text;
+    details: text;
+    actor_id: text;
+  }; Err: text }) query;
+  list_transactions: () -> (vec record {
+    transaction_id: text;
+    timestamp: nat64;
+    action_type: text;
+    details: text;
+    actor_id: text;
+  }) query;
+}
