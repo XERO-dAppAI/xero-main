@@ -3,9 +3,9 @@ use ic_cdk_macros::update;
 use serde::{Serialize, Deserialize};
 use candid::CandidType;
 use std::collections::HashMap;
-use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use std::cell::RefCell;
 
+// Define the structure of each inventory item
 #[derive(Serialize, Deserialize, CandidType, Clone, Debug)]
 pub struct InventoryItem {
     pub id: u32,
@@ -14,36 +14,32 @@ pub struct InventoryItem {
     pub expiration_date: u64,
 }
 
+// Define the Data Aggregator structure to store inventory items
 pub struct DataAggregator {
     pub items: HashMap<u32, InventoryItem>, // Stores items by their unique IDs
-    pub logs: Vec<String>,                  // Log to store upload activity
 }
 
 impl DataAggregator {
     pub fn new() -> Self {
         DataAggregator {
             items: HashMap::new(),
-            logs: Vec::new(),
         }
     }
 
-    pub fn log_upload(&mut self) {
-        let now = OffsetDateTime::now_utc().format("%Y-%m-%d %H:%M:%S");
-        self.logs.push(format!("Data uploaded at {}", now));
-    }
-
+    // Add items to the Data Aggregator
     pub fn add_items(&mut self, items: Vec<InventoryItem>) {
         for item in items {
             self.items.insert(item.id, item);
         }
-        self.log_upload(); // Log upload time whenever items are added
     }
 }
 
+// Make DataAggregator a thread-local instance
 thread_local! {
     static DATA_AGGREGATOR: RefCell<DataAggregator> = RefCell::new(DataAggregator::new());
 }
 
+// Update function to allow inventory data uploads
 #[update]
 fn upload_inventory_data(file_data: Vec<u8>) -> Result<(), String> {
     ic_cdk::println!("Received file data with size: {} bytes", file_data.len());

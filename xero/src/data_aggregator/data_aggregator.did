@@ -1,0 +1,3 @@
+service : {
+  upload_inventory_data : (vec nat8) -> (result {}) query;
+}
