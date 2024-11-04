@@ -1,12 +1,6 @@
 service : {
-    add_inventory_item: (nat32, text, nat32, nat64) -> ();
-    get_inventory_item: (nat32) -> (opt record {
-        id: nat32;
-        name: text;
-        quantity: nat32;
-        expiration_date: nat64;
-    });
-    update_inventory_quantity: (nat32, nat32) -> ();
-    remove_inventory_item: (nat32) -> ();
-    get_inventory_logs: () -> (vec text);     // New function to get logs
+  add_or_update_item: (text, text, nat32, nat64) -> (variant { Ok: text; Err: text });
+  get_item: (text) -> (variant { Ok: text; Err: text }) query;
+  get_all_items: () -> (text) query;
+  remove_item: (text) -> (variant { Ok: text; Err: text });
 }

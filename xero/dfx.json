@@ -16,7 +16,8 @@
 
         "xero_frontend": {
             "dependencies": [
-                "inventory"
+                "inventory",
+                "data_aggregator"
             ],
             "source": [
                 "src/xero_frontend/dist"

@@ -1,3 +1,15 @@
 service : {
-  upload_inventory_data : (vec nat8) -> (result {}) query;
+  // Upload an Excel file (as a blob of bytes) to parse inventory data
+  "upload_inventory_excel": (blob) -> (variant { Ok: text; Err: text });
+  
+  // Send parsed inventory data to another canister for processing
+  "send_inventory_to_canister": (vec record {
+    item_id: text;
+    name: text;
+    quantity: nat32;
+    expiration_date: nat64;
+  }) -> (variant { Ok: text; Err: text });
+  
+  // Query method to display a preview of parsed inventory (placeholder implementation)
+  "get_parsed_inventory_preview": () -> (variant { Ok: text; Err: text }) query;
 }

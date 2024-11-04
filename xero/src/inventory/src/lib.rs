@@ -1,123 +1,131 @@
-use ic_cdk_macros::{update, query};
-use serde::{Serialize, Deserialize};
-use candid::CandidType;
+use ic_cdk::export::candid::{CandidType, Deserialize};
+use ic_cdk_macros::{init, pre_upgrade, post_upgrade, query, update};
+use std::cell::RefCell;
 use std::collections::HashMap;
-use time::{OffsetDateTime, format_description::well_known::Rfc3339};
+use serde::Serialize; // Import the Serialize trait
+use serde_json::to_string_pretty; // Import for JSON formatting
 
-#[derive(Serialize, Deserialize, CandidType, Clone, Debug)]
-pub struct InventoryItem {
-    pub id: u32,
-    pub name: String,
-    pub quantity: u32,
-    pub expiration_date: u64,
+/// Represents an item in the inventory.
+#[derive(CandidType, Deserialize, Serialize, Clone, Debug, Default)]
+struct InventoryItem {
+    item_id: String,
+    name: String,
+    quantity: u32, // nat32 equivalent
+    expiration_date: u64, // Unix timestamp in nanoseconds
+    last_updated: u64, // Unix timestamp in nanoseconds
+    status: String, // "active" or "expiring"
 }
 
-pub struct InventoryManager {
-    pub items: HashMap<u32, InventoryItem>,
-    pub logs: Vec<String>,  // New field to store logs
-}
+/// Alias for a collection of inventory items.
+type Inventory = HashMap<String, InventoryItem>;
 
-impl InventoryManager {
-    pub fn new() -> Self {
-        InventoryManager {
-            items: HashMap::new(),
-            logs: Vec::new(),
-        }
-    }
-
-    // Helper function to get the current timestamp as a string
-    pub fn get_current_time() -> String {
-        let now = OffsetDateTime::now_utc();
-        now.format(&Rfc3339).unwrap_or_else(|_| "Invalid time".to_string())
-    }
-
-    pub fn add_item(&mut self, item: InventoryItem) {
-        self.items.insert(item.id, item.clone());
-        let log = format!(
-            "Item {} added at {}",
-            item.id,
-            InventoryManager::get_current_time()
-        );
-        self.logs.push(log);
-    }
-
-    pub fn get_item(&self, id: u32) -> Option<&InventoryItem> {
-        self.items.get(&id)
-    }
-
-    pub fn update_item_quantity(&mut self, id: u32, quantity: u32) {
-        if let Some(item) = self.items.get_mut(&id) {
-            item.quantity = quantity;
-            let log = format!(
-                "Item {} quantity updated to {} at {}",
-                id,
-                quantity,
-                InventoryManager::get_current_time()
-            );
-            self.logs.push(log);
-        }
-    }
-
-    pub fn remove_item(&mut self, id: u32) {
-        if self.items.remove(&id).is_some() {
-            let log = format!(
-                "Item {} removed at {}",
-                id,
-                InventoryManager::get_current_time()
-            );
-            self.logs.push(log);
-        }
-    }
-
-    // New method to get all logs
-    pub fn get_logs(&self) -> Vec<String> {
-        self.logs.clone()
-    }
-}
-
+// Thread-local storage for the inventory state.
 thread_local! {
-    static INVENTORY_MANAGER: std::cell::RefCell<InventoryManager> = std::cell::RefCell::new(InventoryManager::new());
+    static INVENTORY: RefCell<Inventory> = RefCell::new(HashMap::new());
 }
 
-#[update]
-fn add_inventory_item(id: u32, name: String, quantity: u32, expiration_date: u64) {
-    let item = InventoryItem {
-        id,
-        name,
-        quantity,
-        expiration_date,
-    };
-
-    INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().add_item(item);
+/// Initializes the canister's state.
+#[init]
+fn init() {
+    INVENTORY.with(|inventory| {
+        *inventory.borrow_mut() = HashMap::new();
     });
 }
 
-#[query]
-fn get_inventory_item(id: u32) -> Option<InventoryItem> {
-    INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow().get_item(id).cloned()
+/// Pre-upgrade hook to save the current state.
+#[pre_upgrade]
+fn pre_upgrade() {
+    INVENTORY.with(|inventory| {
+        ic_cdk::storage::stable_save((inventory.borrow().clone(),))
+            .expect("Failed to save inventory during pre-upgrade");
+    });
+}
+
+/// Post-upgrade hook to restore the state.
+#[post_upgrade]
+fn post_upgrade() {
+    let (restored_inventory,): (Inventory,) = ic_cdk::storage::stable_restore()
+        .expect("Failed to restore inventory after upgrade");
+    INVENTORY.with(|inventory| {
+        *inventory.borrow_mut() = restored_inventory;
+    });
+}
+
+/// Adds or updates an inventory item.
+#[update]
+fn add_or_update_item(item_id: String, name: String, quantity: u32, expiration_date: u64) -> Result<String, String> {
+    INVENTORY.with(|inventory| {
+        let mut inventory = inventory.borrow_mut();
+
+        // Validate input
+        if name.trim().is_empty() {
+            return Err("Item name cannot be empty.".to_string());
+        }
+        if quantity == 0 {
+            return Err("Quantity must be greater than zero.".to_string());
+        }
+        if expiration_date <= ic_cdk::api::time() {
+            return Err("Expiration date must be in the future.".to_string());
+        }
+
+        // Determine item status
+        let status = if expiration_date < ic_cdk::api::time() + (7 * 24 * 60 * 60 * 1_000_000_000) {
+            "expiring".to_string()
+        } else {
+            "active".to_string()
+        };
+
+        let new_item = InventoryItem {
+            item_id: item_id.clone(),
+            name,
+            quantity,
+            expiration_date,
+            last_updated: ic_cdk::api::time(),
+            status,
+        };
+
+        inventory.insert(item_id.clone(), new_item);
+        Ok(format!("Item '{}' successfully added or updated.", item_id))
     })
 }
 
-#[update]
-fn update_inventory_quantity(id: u32, quantity: u32) {
-    INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().update_item_quantity(id, quantity);
-    });
-}
-
-#[update]
-fn remove_inventory_item(id: u32) {
-    INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow_mut().remove_item(id);
-    });
-}
-
-// New function to return logs
+/// Retrieves an inventory item by ID as a JSON string.
 #[query]
-fn get_inventory_logs() -> Vec<String> {
-    INVENTORY_MANAGER.with(|inventory| {
-        inventory.borrow().get_logs()
+fn get_item(item_id: String) -> Result<String, String> {
+    INVENTORY.with(|inventory| {
+        match inventory.borrow().get(&item_id) {
+            Some(item) => {
+                let item_json = to_string_pretty(item).unwrap_or_else(|_| "Failed to format item.".to_string());
+                Ok(item_json)
+            }
+            None => Err("Item not found.".to_string()),
+        }
+    })
+}
+
+/// Retrieves all inventory items as a JSON string.
+#[query]
+fn get_all_items() -> String {
+    INVENTORY.with(|inventory| {
+        let items = inventory.borrow();
+        if items.is_empty() {
+            return "No items in inventory.".to_string();
+        }
+
+        let items_vec: Vec<_> = items.values().collect();
+        to_string_pretty(&items_vec).unwrap_or_else(|_| "Failed to format items.".to_string())
+    })
+}
+
+/// Removes an inventory item by ID.
+#[update]
+fn remove_item(item_id: String) -> Result<String, String> {
+    INVENTORY.with(|inventory| {
+        let mut inventory = inventory.borrow_mut();
+        if inventory.remove(&item_id).is_some() {
+            Ok(format!("Item '{}' has been removed from the inventory.", item_id))
+        } else {
+            Err("Item not found.".to_string())
+        }
     })
 }
