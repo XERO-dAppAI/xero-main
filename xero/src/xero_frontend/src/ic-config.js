@@ -1,4 +1,14 @@
-// src/ic-config.js
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory as dataAggregatorIDL } from '../../declarations/data_aggregator';
+import { canisterId as dataAggregatorCanisterId } from '../../declarations/data_aggregator';
 
-export const canisterId = "b77ix-eeaaa-aaaaa-qaada-cai&id=br5f7-7uaaa-aaaaa-qaaca-cai";
-export const host = "http://127.0.0.1:8000"; // If you’re running locally, use this; otherwise, use the IC's network URL for deployment.
+const agent = new HttpAgent({ host: 'http://localhost:8000' });
+// Uncomment this line if you are working in a local development environment
+// agent.fetchRootKey();
+
+const actor = Actor.createActor(dataAggregatorIDL, {
+  agent,
+  canisterId: dataAggregatorCanisterId,
+});
+
+export { actor };
