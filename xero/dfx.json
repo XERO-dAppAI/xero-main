@@ -18,6 +18,12 @@
             "source": ["./src/ledger"],
             "candid": "./src/ledger/ledger.did"
         },
+        "price_engine":{
+            "package": "price_engine",
+            "type": "rust",
+            "source": ["./src/price_engine"],
+            "candid": "./src/price_engine/price_engine.did"
+        },
       
 
         "xero_frontend": {

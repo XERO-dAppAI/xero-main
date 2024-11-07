@@ -1,0 +1,5 @@
+service : {
+  adjust_price: (text) -> (variant { Ok: record { item_id: text; new_price: float32 }; Err: text });
+  get_pricing_rules: () -> (vec record { rule_name: text; rule_description: text; active: bool }) query;
+  set_pricing_rule: (text, text, bool) -> (variant { Ok: text; Err: text });
+}
