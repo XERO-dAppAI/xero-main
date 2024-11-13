@@ -1,15 +1,155 @@
+type ProcessingStatus = variant {
+
+    Pending;
+
+    Processing;
+
+    Completed;
+
+    Failed;
+
+};
+
+
+
+type DataSource = variant {
+
+    Excel;
+
+    CSV;
+
+    API;
+
+    Manual;
+
+};
+
+
+
+type ValidationRule = record {
+
+    rule_id: text;
+
+    field: text;
+
+    condition: text;
+
+    error_message: text;
+
+};
+
+
+
+type ProcessedData = record {
+
+    batch_id: text;
+
+    source: DataSource;
+
+    timestamp: nat64;
+
+    status: ProcessingStatus;
+
+    records_count: nat32;
+
+    success_count: nat32;
+
+    error_count: nat32;
+
+    validation_errors: vec text;
+
+};
+
+
+
+type DataBatch = record {
+
+    batch_id: text;
+
+    data: vec record {
+
+        item_id: text;
+
+        barcode: text;
+
+        name: text;
+
+        category: opt text;
+
+        quantity: nat32;
+
+        expiration_date: nat64;
+
+        price: float64;
+
+    };
+
+    status: ProcessingStatus;
+
+    created_at: nat64;
+
+    processed_at: opt nat64;
+
+};
+
+
+
 service : {
-  // Upload an Excel file (as a blob of bytes) to parse inventory data
-  "upload_inventory_excel": (blob) -> (variant { Ok: text; Err: text });
-  
-  // Send parsed inventory data to another canister for processing
-  "send_inventory_to_canister": (vec record {
-    item_id: text;
-    name: text;
-    quantity: nat32;
-    expiration_date: nat64;
-  }) -> (variant { Ok: text; Err: text });
-  
-  // Query method to display a preview of parsed inventory (placeholder implementation)
-  "get_parsed_inventory_preview": () -> (variant { Ok: text; Err: text }) query;
-}
+
+    // Data Upload and Processing
+
+    upload_inventory_excel: (blob) -> (variant { Ok: ProcessedData; Err: text });
+
+    upload_inventory_csv: (blob) -> (variant { Ok: ProcessedData; Err: text });
+
+    process_batch: (text) -> (variant { Ok: ProcessedData; Err: text });
+
+    
+
+    // Validation and Rules
+
+    add_validation_rule: (ValidationRule) -> (variant { Ok: text; Err: text });
+
+    remove_validation_rule: (text) -> (variant { Ok: text; Err: text });
+
+    get_validation_rules: () -> (vec ValidationRule) query;
+
+    
+
+    // Batch Management
+
+    get_batch_status: (text) -> (variant { Ok: ProcessedData; Err: text }) query;
+
+    list_batches: (nat64, nat64) -> (vec DataBatch) query;
+
+    retry_failed_batch: (text) -> (variant { Ok: ProcessedData; Err: text });
+
+    
+
+    // Synchronization with Inventory
+
+    sync_with_inventory: () -> (variant { Ok: text; Err: text });
+
+    get_sync_status: () -> (record { last_sync: nat64; status: text }) query;
+
+    
+
+    // Analytics and Reporting
+
+    get_processing_statistics: () -> (record {
+
+        total_batches: nat64;
+
+        successful_batches: nat64;
+
+        failed_batches: nat64;
+
+        total_records: nat64;
+
+        success_rate: float64;
+
+    }) query;
+
+};
+
+

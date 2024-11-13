@@ -325,11 +325,12 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 name = "data_aggregator"
 version = "0.1.0"
 dependencies = [
- "candid 0.8.4",
+ "candid 0.9.11",
  "csv",
- "ic-cdk 0.6.10",
- "ic-cdk-macros 0.6.10",
+ "ic-cdk 0.11.6",
+ "ic-cdk-macros 0.8.1",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

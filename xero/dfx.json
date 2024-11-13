@@ -29,13 +29,21 @@
         "xero_frontend": {
             "dependencies": [
                 "inventory",
-                "data_aggregator"
+                "data_aggregator",
+                "price_engine",
+                "ledger"
             ],
+            "frontend": {
+                "entrypoint": "src/xero_frontend/src/index.tsx"
+            },
             "source": [
                 "src/xero_frontend/dist"
             ],
             "type": "assets",
-            "workspace": "xero_frontend"
+            "workspace": "xero_frontend",
+            "build": [
+                "cd src/xero_frontend && npm install && npm run build"
+            ]
         }
     },
     
