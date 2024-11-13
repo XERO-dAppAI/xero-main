@@ -38,6 +38,7 @@
             "workspace": "xero_frontend"
         }
     },
+    
     "defaults": {
         "build": {
             "args": "",
@@ -47,3 +48,4 @@
     "output_env_file": ".env",
     "version": 1
 }
+

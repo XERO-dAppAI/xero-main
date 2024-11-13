@@ -1,4 +1,5 @@
 use ic_cdk::export::candid::{CandidType, Deserialize};
+use ic_cdk::export::Principal;
 use ic_cdk_macros::{init, query, update};
 use serde::Serialize;
 use std::cell::RefCell;
@@ -19,7 +20,7 @@ struct PriceAdjustmentResult {
     new_price: f32,
 }
 
-/// Store the pricing rules and logic settings in thread-local storage.
+
 thread_local! {
     static PRICING_RULES: RefCell<HashMap<String, PricingRule>> = RefCell::new(HashMap::new());
 }
@@ -33,7 +34,7 @@ fn init() {
             "near_expiration".to_string(),
             PricingRule {
                 rule_name: "near_expiration".to_string(),
-                rule_description: "Reduce price by 30% if item is within 3 days of expiration.",
+                rule_description: "Reduce price by 30% if item is within 3 days of expiration.".to_string(),
                 active: true,
             },
         );
@@ -41,7 +42,7 @@ fn init() {
             "low_stock_high_demand".to_string(),
             PricingRule {
                 rule_name: "low_stock_high_demand".to_string(),
-                rule_description: "Increase price by 10% if demand is high and stock is low.",
+                rule_description: "Increase price by 10% if demand is high and stock is low.".to_string(),
                 active: true,
             },
         );
@@ -51,17 +52,15 @@ fn init() {
 /// Adjust the price of an item based on active pricing rules.
 #[update]
 async fn adjust_price(item_id: String) -> Result<PriceAdjustmentResult, String> {
-    // Fetch item details from the inventory canister.
-    let inventory_canister_id = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
-    let item_details: Result<(f32, u64), String> = ic_cdk::api::call::call(
+    // Convert inventory canister ID to Principal
+    let inventory_canister_id = Principal::from_text("bkyz2-fmaaa-aaaaa-qaaaq-cai").unwrap();
+    let (base_price, expiration_date): (f32, u64) = ic_cdk::api::call::call(
         inventory_canister_id,
         "get_item_details",
         (item_id.clone(),),
     )
     .await
     .map_err(|e| format!("Failed to fetch item details: {:?}", e))?;
-
-    let (base_price, expiration_date) = item_details?;
 
     let mut new_price = base_price;
 
@@ -82,9 +81,9 @@ async fn adjust_price(item_id: String) -> Result<PriceAdjustmentResult, String> 
         }
     });
 
-    // Log the price adjustment to the ledger canister (optional).
-    let ledger_canister_id = "be2us-64aaa-aaaaa-qaabq-cai";
-    let _log_result: Result<(), String> = ic_cdk::api::call::call(
+    // Convert ledger canister ID to Principal
+    let ledger_canister_id = Principal::from_text("be2us-64aaa-aaaaa-qaabq-cai").unwrap();
+    let _log_result: () = ic_cdk::api::call::call(
         ledger_canister_id,
         "add_transaction",
         (

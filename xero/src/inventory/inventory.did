@@ -1,6 +1,63 @@
+type ItemStatus = variant {
+    Active;
+    ExpiringSoon;
+    Expired;
+    LowStock;
+    OutOfStock;
+};
+
+type ItemCategory = variant {
+    Produce;
+    Dairy;
+    Meat;
+    Bakery;
+    Grocery;
+    Other;
+};
+
+type AuditLog = record {
+    timestamp: nat64;
+    action: text;
+    details: text;
+    actor: text;
+};
+
+type InventoryItem = record {
+    item_id: text;
+    barcode: text;
+    name: text;
+    category: opt ItemCategory;
+    quantity: nat32;
+    expiration_date: nat64;
+    price: float64;
+    last_updated: nat64;
+    status: ItemStatus;
+    audit_trail: vec AuditLog;
+};
+
+type PaginatedResult = record {
+    items: vec InventoryItem;
+    total: nat64;
+    page: nat64;
+    per_page: nat64;
+};
+
+type SearchCriteria = record {
+    keyword: opt text;
+    category: opt ItemCategory;
+    status: opt ItemStatus;
+    min_quantity: opt nat32;
+    max_price: opt float64;
+};
+
 service : {
-  add_or_update_item: (text, text, nat32, nat64) -> (variant { Ok: text; Err: text });
-  get_item: (text) -> (variant { Ok: text; Err: text }) query;
-  get_all_items: () -> (text) query;
-  remove_item: (text) -> (variant { Ok: text; Err: text });
-}
+    add_or_update_item: (text, text, text, opt ItemCategory, nat32, nat64, float64) -> (variant { Ok: text; Err: text });
+    get_item: (text) -> (variant { Ok: text; Err: text }) query;
+    get_item_by_barcode: (text) -> (variant { Ok: text; Err: text }) query;
+    get_all_items: (opt nat64, opt nat64) -> (PaginatedResult) query;
+    search_inventory: (SearchCriteria) -> (vec InventoryItem) query;
+    remove_item: (text) -> (variant { Ok: text; Err: text });
+    get_expiring_items: (nat64) -> (vec InventoryItem) query;
+    get_low_stock_items: () -> (vec InventoryItem) query;
+    get_all_items_formatted: (opt nat32, opt nat32) -> (text) query;
+};
