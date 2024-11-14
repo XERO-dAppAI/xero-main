@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm i && dfx canister create xero_backend && dfx generate xero_backend && dfx deploy",
+    "setup": "npm i",
     "start": "vite --port 3000",
-    "prebuild": "dfx generate",
+    "prebuild": "node -e \"console.log('Skipping dfx generate during build')\"",
     "build": "tsc && vite build",
-    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
+    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\"",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "react": "^18.2.0",
