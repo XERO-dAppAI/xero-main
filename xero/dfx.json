@@ -1,59 +1,303 @@
 {
+
+
+
     "canisters": {
+
+
+
         "inventory": {
+
+
+
             "package": "inventory",
+
+
+
             "type": "rust",
+
+
+
             "source": ["./src/inventory"],
+
+
+
             "candid": "./src/inventory/inventory.did"
+
+
+
         },
+
+
+
          "data_aggregator":{
+
+
+
             "package": "data_aggregator",
+
+
+
             "type": "rust",
+
+
+
             "source": ["./src/data_aggregator"],
+
+
+
             "candid": "./src/data_aggregator/data_aggregator.did"
+
+
+
         },
+
+
+
         "ledger":{
+
+
+
             "package": "ledger",
+
+
+
             "type": "rust",
+
+
+
             "source": ["./src/ledger"],
+
+
+
             "candid": "./src/ledger/ledger.did"
+
+
+
         },
+
+
+
         "price_engine":{
+
+
+
             "package": "price_engine",
+
+
+
             "type": "rust",
+
+
+
             "source": ["./src/price_engine"],
+
+
+
             "candid": "./src/price_engine/price_engine.did"
+
+
+
         },
-      
+
+
+
+        "internet-identity": {
+
+
+
+            "type": "custom",
+
+
+
+            "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+
+
+
+            "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+
+
+
+            "remote": {
+
+
+
+                "id": {
+
+
+
+                    "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+
+
+
+                    "local": "bkyz2-fmaaa-aaaaa-qaaaq-cai"
+
+
+
+                }
+
+
+
+            }
+
+
+
+        },
+
+
+
+
+
+
 
         "xero_frontend": {
+
+
+
             "dependencies": [
+
+
+
                 "inventory",
+
+
+
                 "data_aggregator",
+
+
+
                 "price_engine",
+
+
+
                 "ledger"
+
+
+
             ],
+
+
+
             "frontend": {
+
+
+
                 "entrypoint": "src/xero_frontend/src/index.tsx"
+
+
+
             },
+
+
+
             "source": [
+
+
+
                 "src/xero_frontend/dist"
+
+
+
             ],
+
+
+
             "type": "assets",
+
+
+
             "workspace": "xero_frontend",
+
+
+
             "build": [
+
+
+
                 "cd src/xero_frontend && npm install && npm run build"
+
+
+
             ]
+
+
+
+        },
+
+
+
+        "business_profile": {
+
+
+
+            "package": "business_profile",
+
+
+
+            "type": "rust",
+
+
+
+            "source": ["./src/business_profile"],
+
+
+
+            "candid": "./src/business_profile/business_profile.did"
+
+
+
         }
+
+
+
     },
+
+
+
     
+
+
+
     "defaults": {
+
+
+
         "build": {
+
+
+
             "args": "",
+
+
+
             "packtool": ""
+
+
+
         }
+
+
+
     },
+
+
+
     "output_env_file": ".env",
+
+
+
     "version": 1
+
+
+
 }
+
+
+
+
+
+
+
+
+
 
