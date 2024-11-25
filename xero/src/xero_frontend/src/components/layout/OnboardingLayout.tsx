@@ -1,17 +1,12 @@
 import React from 'react';
 import { Header } from './Header';
+import { Outlet } from 'react-router-dom';
 
-interface OnboardingLayoutProps {
-  children: React.ReactNode;
-}
-
-export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ children }) => {
+export const OnboardingLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow flex">
-        {children}
-      </main>
+      <Outlet />
     </div>
   );
 }; 

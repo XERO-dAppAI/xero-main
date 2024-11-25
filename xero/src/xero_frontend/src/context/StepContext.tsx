@@ -20,28 +20,28 @@ const initialSteps: Step[] = [
   {
     id: 1,
     title: "Verify Identity",
-    description: "One time sign in with Nfid / Iii",
+    description: "One-time sign in with NFID / III",
     completed: false,
     current: true
   },
   {
     id: 2,
-    title: "Set Up business Profile",
-    description: "Tell Us about Your Business Details",
+    title: "Set Up Business Profile",
+    description: "Tell us about your business details",
     completed: false,
     current: false
   },
   {
     id: 3,
-    title: "Features you use",
-    description: "What features of Xero will you be using",
+    title: "Features You Use",
+    description: "What features of XERO will you be using",
     completed: false,
     current: false
   },
   {
     id: 4,
     title: "Terms & Conditions",
-    description: "Agree to XERO's TM's before starting",
+    description: "Agree to XERO's Terms before starting",
     completed: false,
     current: false
   }

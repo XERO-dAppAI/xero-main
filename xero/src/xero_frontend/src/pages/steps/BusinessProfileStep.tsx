@@ -45,19 +45,73 @@ export const BusinessProfileStep: React.FC = () => {
   ];
 
   const africanCountries = [
+    { value: 'dz', label: 'Algeria', phoneCode: '+213' },
+    { value: 'ao', label: 'Angola', phoneCode: '+244' },
+    { value: 'bj', label: 'Benin', phoneCode: '+229' },
+    { value: 'bw', label: 'Botswana', phoneCode: '+267' },
+    { value: 'bf', label: 'Burkina Faso', phoneCode: '+226' },
+    { value: 'bi', label: 'Burundi', phoneCode: '+257' },
+    { value: 'cm', label: 'Cameroon', phoneCode: '+237' },
+    { value: 'cv', label: 'Cape Verde', phoneCode: '+238' },
+    { value: 'cf', label: 'Central African Republic', phoneCode: '+236' },
+    { value: 'td', label: 'Chad', phoneCode: '+235' },
+    { value: 'km', label: 'Comoros', phoneCode: '+269' },
+    { value: 'cg', label: 'Congo', phoneCode: '+242' },
+    { value: 'cd', label: 'DR Congo', phoneCode: '+243' },
+    { value: 'dj', label: 'Djibouti', phoneCode: '+253' },
+    { value: 'eg', label: 'Egypt', phoneCode: '+20' },
+    { value: 'gq', label: 'Equatorial Guinea', phoneCode: '+240' },
+    { value: 'er', label: 'Eritrea', phoneCode: '+291' },
+    { value: 'et', label: 'Ethiopia', phoneCode: '+251' },
+    { value: 'ga', label: 'Gabon', phoneCode: '+241' },
+    { value: 'gm', label: 'Gambia', phoneCode: '+220' },
+    { value: 'gh', label: 'Ghana', phoneCode: '+233' },
+    { value: 'gn', label: 'Guinea', phoneCode: '+224' },
+    { value: 'gw', label: 'Guinea-Bissau', phoneCode: '+245' },
+    { value: 'ci', label: 'Ivory Coast', phoneCode: '+225' },
     { value: 'ke', label: 'Kenya', phoneCode: '+254' },
-    { value: 'ug', label: 'Uganda', phoneCode: '+256' },
+    { value: 'ls', label: 'Lesotho', phoneCode: '+266' },
+    { value: 'lr', label: 'Liberia', phoneCode: '+231' },
+    { value: 'ly', label: 'Libya', phoneCode: '+218' },
+    { value: 'mg', label: 'Madagascar', phoneCode: '+261' },
+    { value: 'mw', label: 'Malawi', phoneCode: '+265' },
+    { value: 'ml', label: 'Mali', phoneCode: '+223' },
+    { value: 'mr', label: 'Mauritania', phoneCode: '+222' },
+    { value: 'mu', label: 'Mauritius', phoneCode: '+230' },
+    { value: 'ma', label: 'Morocco', phoneCode: '+212' },
+    { value: 'mz', label: 'Mozambique', phoneCode: '+258' },
+    { value: 'na', label: 'Namibia', phoneCode: '+264' },
+    { value: 'ne', label: 'Niger', phoneCode: '+227' },
+    { value: 'ng', label: 'Nigeria', phoneCode: '+234' },
+    { value: 'rw', label: 'Rwanda', phoneCode: '+250' },
+    { value: 'st', label: 'São Tomé and Príncipe', phoneCode: '+239' },
+    { value: 'sn', label: 'Senegal', phoneCode: '+221' },
+    { value: 'sc', label: 'Seychelles', phoneCode: '+248' },
+    { value: 'sl', label: 'Sierra Leone', phoneCode: '+232' },
+    { value: 'so', label: 'Somalia', phoneCode: '+252' },
+    { value: 'za', label: 'South Africa', phoneCode: '+27' },
+    { value: 'ss', label: 'South Sudan', phoneCode: '+211' },
+    { value: 'sd', label: 'Sudan', phoneCode: '+249' },
+    { value: 'sz', label: 'Eswatini', phoneCode: '+268' },
     { value: 'tz', label: 'Tanzania', phoneCode: '+255' },
-    // ... add other countries as needed
+    { value: 'tg', label: 'Togo', phoneCode: '+228' },
+    { value: 'tn', label: 'Tunisia', phoneCode: '+216' },
+    { value: 'ug', label: 'Uganda', phoneCode: '+256' },
+    { value: 'zm', label: 'Zambia', phoneCode: '+260' },
+    { value: 'zw', label: 'Zimbabwe', phoneCode: '+263' }
   ];
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData({ ...formData, logo: file });
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewLogo(reader.result as string);
+        const base64String = reader.result as string;
+        setPreviewLogo(base64String);
+        setFormData(prev => ({
+          ...prev,
+          logo: base64String
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -66,7 +120,14 @@ export const BusinessProfileStep: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Save form data logic here
+      // Save to localStorage with all data including logo
+      localStorage.setItem('business_profile', JSON.stringify({
+        ...formData,
+        logo: previewLogo, // Save the base64 logo string
+        created_at: Date.now(),
+        updated_at: Date.now()
+      }));
+      
       completeStep(2);
       navigate('/features');
     } catch (error) {

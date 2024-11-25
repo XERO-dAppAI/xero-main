@@ -1,91 +1,24 @@
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
-// Import the interface factories
-import { idlFactory as inventoryIDL } from '../../../declarations/inventory';
-import { idlFactory as priceEngineIDL } from '../../../declarations/price_engine';
-import { idlFactory as dataAggregatorIDL } from '../../../declarations/data_aggregator';
-import { idlFactory as ledgerIDL } from '../../../declarations/ledger';
-
-// Import the canister IDs
-import {
-  canisterId as inventoryCanisterId,
-  createActor as createInventoryActor,
-} from '../../../declarations/inventory';
-import {
-  canisterId as priceEngineCanisterId,
-  createActor as createPriceEngineActor,
-} from '../../../declarations/price_engine';
-import {
-  canisterId as dataAggregatorCanisterId,
-  createActor as createDataAggregatorActor,
-} from '../../../declarations/data_aggregator';
-import {
-  canisterId as ledgerCanisterId,
-  createActor as createLedgerActor,
-} from '../../../declarations/ledger';
-
-const host = process.env.DFX_NETWORK === 'ic' 
+const host = import.meta.env.VITE_DFX_NETWORK === 'ic' 
   ? 'https://ic0.app' 
-  : `http://localhost:${process.env.DFX_PORT || 4943}`;
+  : `http://localhost:${import.meta.env.VITE_DFX_PORT || 4943}`;
 
-const agent = new HttpAgent({ host });
-
-// Only fetch root key when in development
-if (process.env.NODE_ENV !== 'production') {
-  agent.fetchRootKey().catch(err => {
-    console.warn('Unable to fetch root key. Check to ensure that your local replica is running');
-    console.error(err);
-  });
-}
-
-// Create actor instances
-export const inventoryActor = createInventoryActor(inventoryCanisterId, {
-  agentOptions: { host },
-});
-
-export const priceEngineActor = createPriceEngineActor(priceEngineCanisterId, {
-  agentOptions: { host },
-});
-
-export const dataAggregatorActor = createDataAggregatorActor(dataAggregatorCanisterId, {
-  agentOptions: { host },
-});
-
-export const ledgerActor = createLedgerActor(ledgerCanisterId, {
-  agentOptions: { host },
-});
-
-// Helper function to create a new actor instance with a different identity
-export const createActorWithIdentity = (
-  canisterId: string,
-  idlFactory: any,
-  identity: any
-) => {
-  const agent = new HttpAgent({ host, identity });
+export const createBusinessProfileActor = async (identity: any) => {
+  const agent = new HttpAgent({ identity, host });
   
-  if (process.env.NODE_ENV !== 'production') {
-    agent.fetchRootKey().catch(console.error);
+  if (import.meta.env.VITE_DFX_NETWORK === 'local') {
+    await agent.fetchRootKey();
   }
+
+  // Get the canister ID from the environment
+  const canisterId = import.meta.env.VITE_BUSINESS_PROFILE_CANISTER_ID;
   
-  return Actor.createActor(idlFactory, {
-    agent,
-    canisterId: Principal.fromText(canisterId),
-  });
-};
+  if (!canisterId) {
+    throw new Error('Business Profile canister ID not found');
+  }
 
-// Export the IDL factories for potential direct use
-export const idlFactories = {
-  inventory: inventoryIDL,
-  priceEngine: priceEngineIDL,
-  dataAggregator: dataAggregatorIDL,
-  ledger: ledgerIDL,
-};
-
-// Export canister IDs
-export const canisterIds = {
-  inventory: inventoryCanisterId,
-  priceEngine: priceEngineCanisterId,
-  dataAggregator: dataAggregatorCanisterId,
-  ledger: ledgerCanisterId,
+  // Create actor directly from window object
+  return window.business_profile;
 }; 

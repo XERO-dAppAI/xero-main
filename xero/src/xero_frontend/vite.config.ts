@@ -8,10 +8,6 @@ export default defineConfig({
   plugins: [react()],
   define: {
     global: 'window',
-    'process.env': {
-      DFX_NETWORK: JSON.stringify(process.env.DFX_NETWORK),
-      NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-    }
   },
   server: {
     proxy: {

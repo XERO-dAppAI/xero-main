@@ -6,7 +6,7 @@ import { IoMdInformationCircle } from 'react-icons/io';
 import { 
   MdOutlineQueryStats, 
   MdLockOutline, 
-  MdInventory,
+  MdInventory2,
   MdOutlineAutoGraph,
   MdPriceChange
 } from 'react-icons/md';
@@ -16,7 +16,6 @@ interface Feature {
   title: string;
   description: string;
   icon: React.ReactNode;
-  available: boolean;
 }
 
 export const FeaturesStep: React.FC = () => {
@@ -29,46 +28,33 @@ export const FeaturesStep: React.FC = () => {
       id: 'ai_forecasting',
       title: 'AI-Powered Demand Forecasting',
       description: 'Predict customer needs with data-driven insights for optimal restocking.',
-      icon: <MdOutlineQueryStats className="w-8 h-8" />,
-      available: true
+      icon: <MdOutlineQueryStats className="w-6 h-6 text-[#666ed2]" />
     },
     {
       id: 'dynamic_pricing',
       title: 'Dynamic Pricing Adjustments',
       description: 'Adjust prices dynamically based on product lifecycle and demand.',
-      icon: <MdPriceChange className="w-8 h-8" />,
-      available: false
+      icon: <MdPriceChange className="w-6 h-6 text-[#666ed2]" />
     },
     {
       id: 'inventory_insights',
       title: 'Real-Time Inventory Insights',
       description: 'Track and manage your inventory in real-time with advanced analytics.',
-      icon: <MdInventory className="w-8 h-8" />,
-      available: true
+      icon: <MdInventory2 className="w-6 h-6 text-[#666ed2]" />
     },
     {
       id: 'blockchain_transparency',
       title: 'Blockchain-Based Transparency',
       description: 'Secure your data with tamper-proof, blockchain-verified records.',
-      icon: <MdLockOutline className="w-8 h-8" />,
-      available: true
+      icon: <MdLockOutline className="w-6 h-6 text-[#666ed2]" />
     },
     {
       id: 'customer_patterns',
       title: 'Customer Buying Patterns',
       description: 'Analyze customer behavior to refine your marketing strategies.',
-      icon: <MdOutlineAutoGraph className="w-8 h-8" />,
-      available: false
+      icon: <MdOutlineAutoGraph className="w-6 h-6 text-[#666ed2]" />
     }
   ];
-
-  const toggleFeature = (featureId: string) => {
-    setSelectedFeatures(prev => 
-      prev.includes(featureId)
-        ? prev.filter(id => id !== featureId)
-        : [...prev, featureId]
-    );
-  };
 
   const handleSubmit = async () => {
     if (selectedFeatures.length > 0) {
@@ -94,57 +80,52 @@ export const FeaturesStep: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <IoMdInformationCircle className="text-secondary" />
+        <IoMdInformationCircle className="text-secondary w-5 h-5" />
         <span className="font-raleway text-sm">
           * Some features may not be included in the MVP version
         </span>
       </motion.div>
 
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full mb-12"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          visible: {
-            transition: {
-              staggerChildren: 0.1
-            }
-          }
-        }}
-      >
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
         {features.map((feature, index) => (
           <motion.div
-            key={feature.id}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            viewport={{ once: true }}
+            onClick={() => {
+              setSelectedFeatures(prev => 
+                prev.includes(feature.id)
+                  ? prev.filter(id => id !== feature.id)
+                  : [...prev, feature.id]
+              );
             }}
-            transition={{ duration: 0.5 }}
-            className={`relative rounded-xl p-6 cursor-pointer transition-all
-              ${selectedFeatures.includes(feature.id) 
-                ? 'bg-secondary text-white' 
-                : 'bg-white text-primary hover:bg-gray-50'
-              } border-2 border-gray-100`}
-            onClick={() => toggleFeature(feature.id)}
+            className={`p-6 rounded-2xl bg-white border cursor-pointer
+              ${selectedFeatures.includes(feature.id)
+                ? 'border-[#666ed2] bg-[#666ed2]/5'
+                : 'border-gray-100 hover:border-[#666ed2]/20'
+              } transition-colors group`}
           >
-            {!feature.available && (
-              <div className="absolute top-2 right-2 text-xs font-raleway text-secondary bg-secondary/10 px-2 py-1 rounded-full">
-                Coming Soon
-              </div>
-            )}
-            <div className="flex flex-col h-full">
-              <div className={`mb-4 ${selectedFeatures.includes(feature.id) ? 'text-white' : 'text-secondary'}`}>
-                {feature.icon}
-              </div>
-              <h3 className="font-syne text-xl mb-2">{feature.title}</h3>
-              <p className="font-raleway text-sm opacity-80">{feature.description}</p>
-            </div>
+            <motion.div 
+              className="bg-[#666ed2]/10 p-3 rounded-xl w-fit mb-4 group-hover:bg-[#666ed2]/20 transition-colors"
+              whileHover={{ scale: 1.1, rotate: 360 }}
+              transition={{ duration: 0.3 }}
+            >
+              {feature.icon}
+            </motion.div>
+            <h3 className="text-xl font-syne mb-2 text-[#2D2654]">
+              {feature.title}
+            </h3>
+            <p className="text-gray-500">
+              {feature.description}
+            </p>
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
       <motion.div 
-        className="relative"
+        className="relative mt-12"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
