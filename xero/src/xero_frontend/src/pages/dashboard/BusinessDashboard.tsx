@@ -19,6 +19,7 @@ import {
 import xeroLogo from '../../assets/xero.png';
 import { Account } from './Account';
 import { Inventory } from './Inventory';
+import { Analytics } from './Analytics';
 
 export const BusinessDashboard: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('overview');
@@ -65,6 +66,8 @@ export const BusinessDashboard: React.FC = () => {
         return <Account />;
       case 'inventory':
         return <Inventory />;
+      case 'analytics':
+        return <Analytics />;
       case 'overview':
         return (
           <div className="max-w-[1000px] mx-auto">
