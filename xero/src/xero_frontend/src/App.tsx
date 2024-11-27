@@ -8,6 +8,7 @@ import { TermsStep } from './pages/steps/TermsStep';
 import { BusinessDashboard } from './pages/dashboard/BusinessDashboard';
 import { StepProvider } from './context/StepContext';
 import './index.css';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
+      <Toaster position="top-right" />
     </StepProvider>
   );
 }
