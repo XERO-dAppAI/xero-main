@@ -24,24 +24,12 @@
             "source": ["./src/price_engine"],
             "candid": "./src/price_engine/price_engine.did"
         },
-        "internet-identity": {
-            "type": "custom",
-            "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-            "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
-            "remote": {
-                "id": {
-                    "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-                    "local": "bkyz2-fmaaa-aaaaa-qaaaq-cai"
-                }
-            }
-        },
         "xero_frontend": {
             "dependencies": [
                 "inventory",
                 "data_aggregator",
                 "price_engine",
                 "ledger"
-               
             ],
             "frontend": {
                 "entrypoint": "src/xero_frontend/src/index.tsx"
@@ -55,7 +43,6 @@
                 "cd src/xero_frontend && npm install && npm run build"
             ]
         }
-       
     },
     "defaults": {
         "build": {

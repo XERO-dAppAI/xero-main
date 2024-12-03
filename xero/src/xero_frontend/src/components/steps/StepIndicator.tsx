@@ -26,7 +26,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
       <div className="relative">
         <motion.div 
           className={`w-5 h-5 rounded-full border flex items-center justify-center
-            ${completed ? 'bg-secondary border-secondary' : 'border-secondary'}`}
+            ${completed ? 'bg-[#5f9898] border-[#5f9898]' : 'border-[#5f9898]'}`}
           initial={false}
           animate={completed ? { scale: [1.4, 1] } : {}}
           transition={{ duration: 0.3 }}
@@ -42,19 +42,18 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
             </motion.span>
           )}
         </motion.div>
-        {!completed && (
-          <motion.div
-            className="absolute -inset-1 rounded-full border-2 border-secondary/30"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        )}
+        <motion.div
+          className="absolute -inset-1 rounded-full border-2 border-[#5f9898]/30"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
       </div>
+
       <div className="flex flex-col">
-        <span className="font-syne text-primary text-base mb-1 font-bold">
+        <span className="font-syne text-[#062424] text-base mb-1 font-bold">
           {title}
         </span>
-        <span className="font-raleway text-gray-500 text-sm max-w-[180px]">
+        <span className="font-raleway text-[#062424]/70 text-sm max-w-[180px]">
           {description}
         </span>
       </div>

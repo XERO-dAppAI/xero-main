@@ -218,7 +218,9 @@ export const Ledger: React.FC = () => {
                   {entry.action_type === 'PriceRuleUpdate' && entry.details.old_rules && (
                     <div className="text-sm text-gray-500 bg-gray-50 p-2 rounded mt-2">
                       <p>Previous Rules: {JSON.parse(entry.details.old_rules).maxDiscount}% max discount</p>
-                      <p>New Rules: {JSON.parse(entry.details.new_rules).maxDiscount}% max discount</p>
+                      {entry.details.new_rules && (
+                        <p>New Rules: {JSON.parse(entry.details.new_rules || '{"maxDiscount": 0}').maxDiscount}% max discount</p>
+                      )}
                     </div>
                   )}
                   {entry.details.old_value !== undefined && (

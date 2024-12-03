@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useStep } from '../../context/StepContext';
+import { 
+  Building2, 
+  Globe2, 
+  FileText, 
+  Phone, 
+  Mail, 
+  ImagePlus,
+  Store,
+  Building,
+  BadgeCheck,
+  ArrowRight
+} from 'lucide-react';
 
 interface BusinessProfileForm {
   businessName: string;
@@ -29,6 +41,14 @@ export const BusinessProfileStep: React.FC = () => {
     phoneNumber: '',
     email: ''
   });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const businessTypes = [
     { value: 'small_business', label: 'Small Business' },
@@ -110,7 +130,7 @@ export const BusinessProfileStep: React.FC = () => {
         setPreviewLogo(base64String);
         setFormData(prev => ({
           ...prev,
-          logo: base64String
+          logo: file
         }));
       };
       reader.readAsDataURL(file);
@@ -120,15 +140,16 @@ export const BusinessProfileStep: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Save to localStorage with all data including logo
+      // Save to localStorage
       localStorage.setItem('business_profile', JSON.stringify({
         ...formData,
-        logo: previewLogo, // Save the base64 logo string
+        logo: previewLogo,
         created_at: Date.now(),
         updated_at: Date.now()
       }));
       
-      completeStep(2);
+      // Complete this step and navigate to next
+      await completeStep(2);
       navigate('/features');
     } catch (error) {
       console.error('Error saving form:', error);
@@ -140,218 +161,298 @@ export const BusinessProfileStep: React.FC = () => {
     return country?.phoneCode || '';
   };
 
+  const iconContainerClass = `
+    w-8 h-8 rounded-full flex items-center justify-center
+    bg-gradient-to-br from-white/10 to-[#1a6363]/5
+    backdrop-blur-[4px]
+    border border-white/20
+    shadow-[inset_0_0_8px_rgba(26,99,99,0.1)]
+    relative
+    before:absolute before:inset-0 before:rounded-full
+    before:bg-gradient-to-br before:from-white/20 before:to-transparent
+    before:backdrop-blur-[4px]
+    hover:before:opacity-70
+    transition-all duration-300
+  `;
+
+  const iconClass = "w-4 h-4 text-[#1a6363] relative z-10";
+
   return (
-    <div className="flex-grow flex flex-col items-center px-16 py-8">
-      <motion.h1 
-        className="section-title mb-8 font-syne"
-        initial={{ opacity: 0, y: 20 }}
+    <div className="max-w-3xl mx-auto w-full">
+      <motion.h2 
+        className="section-title mt-5 mb-12"
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.2 }}
       >
-        Set Up Business Profile
-      </motion.h1>
+        <span className="text-[#062424]">Set up your</span>{" "}
+        <motion.span
+          className="text-[#267c7c]"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          business
+        </motion.span>
+      </motion.h2>
 
-      <motion.form 
-        className="w-full max-w-2xl space-y-8"
-        onSubmit={handleSubmit}
-      >
-        {/* Logo Upload */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="absolute inset-0 dark-purple-glow animate-glow rounded-full" />
-            <label
-              htmlFor="logo-upload"
-              className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-secondary relative z-10 cursor-pointer hover:bg-gray-50 transition-colors group"
-            >
-              {previewLogo ? (
-                <div className="w-full h-full relative group">
-                  <img 
-                    src={previewLogo} 
-                    alt="Business Logo" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-sm">Change Logo</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-400 text-center group-hover:text-gray-500 transition-colors">
-                  <svg 
-                    className="w-12 h-12 mx-auto mb-2" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
+      <motion.div className="relative">
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-xl rounded-3xl" />
+        
+        <motion.form 
+          className="relative z-10 p-8 space-y-8"
+          onSubmit={handleSubmit}
+        >
+          {/* Logo Upload with glassy effect */}
+          <div className="flex flex-col items-center gap-4 mb-12">
+            <div className="relative">
+              {/* Glassy circle background */}
+              <div className="absolute inset-0 rounded-full bg-[#062424]/5 backdrop-blur-md" />
+              
+              {/* Dashed border circle */}
+              <label
+                htmlFor="logo-upload"
+                className="relative w-32 h-32 rounded-full flex items-center justify-center overflow-hidden cursor-pointer group"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(26,99,99,0.05), rgba(6,36,36,0.1))',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  border: '2px dashed rgba(26,99,99,0.3)',
+                }}
+              >
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="hidden"
+                />
+                
+                {previewLogo ? (
+                  <div className="w-full h-full relative group">
+                    <img 
+                      src={previewLogo} 
+                      alt="Business Logo" 
+                      className="w-full h-full object-cover"
                     />
-                  </svg>
-                  <span className="text-sm">Upload Logo</span>
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(6,36,36,0.7), rgba(26,99,99,0.8))',
+                        backdropFilter: 'blur(4px)',
+                      }}
+                    >
+                      <ImagePlus className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-[#1a6363] group-hover:text-[#062424] transition-colors">
+                    <ImagePlus className="w-8 h-8" />
+                    <span className="text-sm font-syne">Upload Logo</span>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Business Name */}
+            <div className="col-span-2">
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Store className={iconClass} />
                 </div>
-              )}
-            </label>
-          </div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleLogoChange}
-            className="hidden"
-            id="logo-upload"
-          />
-        </div>
-
-        {/* Business Name */}
-        <div>
-          <label htmlFor="businessName" className="block text-primary font-syne mb-2">
-            Business Name *
-          </label>
-          <input
-            id="businessName"
-            type="text"
-            value={formData.businessName}
-            onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-            className="w-full p-3 rounded-lg border border-gray-300 font-raleway placeholder:font-raleway"
-            placeholder="Enter your business name"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Country */}
-          <div>
-            <label htmlFor="country" className="block text-primary font-syne mb-2">
-              Country *
-            </label>
-            <select
-              id="country"
-              value={formData.country}
-              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-              className="w-full p-3 rounded-lg border border-gray-300 font-raleway"
-              required
-            >
-              <option value="" className="font-raleway">Select country</option>
-              {africanCountries.map(country => (
-                <option key={country.value} value={country.value} className="font-raleway">
-                  {country.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Registration Number */}
-          <div>
-            <label htmlFor="registrationNumber" className="block text-primary font-syne mb-2">
-              Business Registration Number *
-            </label>
-            <input
-              id="registrationNumber"
-              type="text"
-              value={formData.registrationNumber}
-              onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
-              className="w-full p-3 rounded-lg border border-gray-300 font-raleway placeholder:font-raleway"
-              placeholder="Enter registration number"
-              required
-            />
-          </div>
-
-          {/* Business Type */}
-          <div>
-            <label htmlFor="businessType" className="block text-primary font-syne mb-2">
-              Business Type *
-            </label>
-            <select
-              id="businessType"
-              value={formData.businessType}
-              onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
-              className="w-full p-3 rounded-lg border border-gray-300 font-raleway"
-              required
-            >
-              <option value="" className="font-raleway">Select business type</option>
-              {businessTypes.map(type => (
-                <option key={type.value} value={type.value} className="font-raleway">
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Business Category */}
-          <div>
-            <label htmlFor="businessCategory" className="block text-primary font-syne mb-2">
-              Business Category *
-            </label>
-            <select
-              id="businessCategory"
-              value={formData.businessCategory}
-              onChange={(e) => setFormData({ ...formData, businessCategory: e.target.value })}
-              className="w-full p-3 rounded-lg border border-gray-300 font-raleway"
-              required
-            >
-              <option value="" className="font-raleway">Select business category</option>
-              {businessCategories.map(category => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label htmlFor="phoneNumber" className="block text-primary font-raleway mb-2">
-              Phone Number *
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
-                {getPhoneCode()}
-              </span>
+                Business Name *
+              </label>
               <input
-                id="phoneNumber"
+                type="text"
+                name="businessName"
+                value={formData.businessName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424] placeholder:text-[#062424]/50"
+                placeholder="Enter your business name"
+                required
+              />
+            </div>
+
+            {/* Country */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Globe2 className={iconClass} />
+                </div>
+                Country *
+              </label>
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424]"
+                required
+              >
+                <option value="">Select country</option>
+                {africanCountries.map(country => (
+                  <option key={country.value} value={country.value}>
+                    {country.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Registration Number */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <BadgeCheck className={iconClass} />
+                </div>
+                Registration Number *
+              </label>
+              <input
+                type="text"
+                name="registrationNumber"
+                value={formData.registrationNumber}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424] placeholder:text-[#062424]/50"
+                placeholder="Enter registration number"
+                required
+              />
+            </div>
+
+            {/* Business Type */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Building2 className={iconClass} />
+                </div>
+                Business Type *
+              </label>
+              <select
+                name="businessType"
+                value={formData.businessType}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424]"
+                required
+              >
+                <option value="">Select business type</option>
+                {businessTypes.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Business Category */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Building className={iconClass} />
+                </div>
+                Business Category *
+              </label>
+              <select
+                name="businessCategory"
+                value={formData.businessCategory}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424]"
+                required
+              >
+                <option value="">Select business category</option>
+                {businessCategories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Phone className={iconClass} />
+                </div>
+                Phone Number *
+              </label>
+              <input
                 type="tel"
+                name="phoneNumber"
                 value={formData.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                className="flex-1 p-3 rounded-r-lg border border-gray-300"
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424] placeholder:text-[#062424]/50"
                 placeholder="Enter phone number"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="flex items-center gap-2 text-[#062424] font-syne mb-2">
+                <div className={iconContainerClass}>
+                  <Mail className={iconClass} />
+                </div>
+                Business Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#062424]/5 border border-[#1a6363]/20 focus:border-[#1a6363] outline-none text-[#062424] placeholder:text-[#062424]/50"
+                placeholder="Enter business email"
                 required
               />
             </div>
           </div>
 
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-primary font-raleway mb-2">
-              Business Email *
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full p-3 rounded-lg border border-gray-300"
-              placeholder="Enter business email"
-              required
-            />
-          </div>
-        </div>
+          {/* Submit Button */}
+          <div className="flex justify-center mt-12">
+            <motion.button
+              className="group relative overflow-hidden rounded-3xl font-syne px-12 py-4 w-[380px]"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+            >
+              {/* Glass effect background */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#062424]/80 to-[#1a6363]/80 backdrop-blur-[4px]" />
+              
+              {/* Shine effect */}
+              <div className="absolute inset-0">
+                <div 
+                  className="absolute inset-0 transform -translate-x-full animate-windshield bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                />
+              </div>
 
-        {/* Submit Button */}
-        <motion.div 
-          className="relative"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="absolute inset-0 dark-purple-glow animate-glow rounded-lg" />
-          <button
-            type="submit"
-            className="w-full bg-[#666ed2] text-white py-4 px-6 rounded-lg font-raleway relative z-10 hover:bg-[#666ed2]/90 transition-colors"
-          >
-            Continue to Features
-          </button>
-        </motion.div>
-      </motion.form>
+              {/* Border glow */}
+              <div 
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                }}
+              />
+
+              {/* Button content */}
+              <div className="relative z-10 flex items-center justify-center gap-2 text-white">
+                <span>Continue to Features</span>
+                <motion.div
+                  animate={{ 
+                    x: [0, 5, 0] 
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </motion.div>
+              </div>
+            </motion.button>
+          </div>
+        </motion.form>
+      </motion.div>
     </div>
   );
 }; 

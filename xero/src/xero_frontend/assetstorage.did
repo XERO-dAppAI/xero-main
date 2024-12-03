@@ -1,0 +1,95 @@
+type BatchId = nat;
+type ChunkId = nat;
+type Key = text;
+type Time = int;
+
+type CreateAssetArguments = record {
+  key: Key;
+  content_type: text;
+  max_age: opt nat64;
+  headers: opt vec record { text; text; };
+};
+
+type SetAssetContentArguments = record {
+  key: Key;
+  content_encoding: text;
+  chunk_ids: vec ChunkId;
+  sha256: opt blob;
+};
+
+type UnsetAssetContentArguments = record {
+  key: Key;
+  content_encoding: text;
+};
+
+type DeleteAssetArguments = record {
+  key: Key;
+};
+
+type ClearArguments = record {};
+
+service : {
+  get: (record {
+    key: Key;
+    accept_encodings: vec text;
+  }) -> (record {
+    content: blob;
+    content_type: text;
+    content_encoding: text;
+    total_length: nat64;
+    sha256: opt blob;
+  }) query;
+
+  get_chunk: (record {
+    key: Key;
+    content_encoding: text;
+    index: nat;
+    sha256: opt blob;
+  }) -> (record { content: blob }) query;
+
+  create_batch: () -> (record { batch_id: BatchId });
+
+  create_chunk: (record { batch_id: BatchId; content: blob }) -> (record { chunk_id: ChunkId });
+
+  commit_batch: (record { batch_id: BatchId; operations: vec variant {
+    CreateAsset: CreateAssetArguments;
+    SetAssetContent: SetAssetContentArguments;
+    UnsetAssetContent: UnsetAssetContentArguments;
+    DeleteAsset: DeleteAssetArguments;
+    Clear: ClearArguments;
+  }}) -> ();
+
+  create_asset: (CreateAssetArguments) -> ();
+  set_asset_content: (SetAssetContentArguments) -> ();
+  unset_asset_content: (UnsetAssetContentArguments) -> ();
+  delete_asset: (DeleteAssetArguments) -> ();
+
+  clear: (ClearArguments) -> ();
+
+  list: (record {}) -> (vec record {
+    key: Key;
+    content_type: text;
+    encodings: vec record {
+      content_encoding: text;
+      total_length: nat64;
+      modified: Time;
+      sha256: opt blob;
+    };
+  }) query;
+
+  get_asset_properties: (record { key: Key }) -> (record {
+    max_age: opt nat64;
+    headers: opt vec record { text; text; };
+    allow_raw_access: opt bool;
+  }) query;
+
+  validate_commit_proposed_batch: (record { batch_id: BatchId; operations: vec variant {
+    CreateAsset: CreateAssetArguments;
+    SetAssetContent: SetAssetContentArguments;
+    UnsetAssetContent: UnsetAssetContentArguments;
+    DeleteAsset: DeleteAssetArguments;
+    Clear: ClearArguments;
+  }}) -> ();
+
+  authorize: (principal) -> ();
+} 

@@ -71,7 +71,7 @@ export const Account: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#666ED2]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1a6363]" />
       </div>
     );
   }
@@ -90,10 +90,13 @@ export const Account: React.FC = () => {
         type="text"
         value={editedProfile[field]}
         onChange={(e) => setEditedProfile({ ...editedProfile, [field]: e.target.value })}
-        className="w-full p-2 rounded-lg border border-gray-200 focus:border-[#666ED2] outline-none"
+        className="w-full p-2 rounded-lg border border-gray-200 focus:border-[#1a6363] outline-none"
+        aria-label={`Edit ${label}`}
+        title={`Edit ${label}`}
+        placeholder={`Enter new ${label.toLowerCase()}`}
       />
     ) : (
-      <p className="font-syne text-[#2D2654]">{value}</p>
+      <p className="font-syne text-[#062424]">{value}</p>
     );
   };
 
@@ -102,23 +105,23 @@ export const Account: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
+        className="bg-white rounded-2xl p-8 shadow-sm border border-[#1a6363]/10"
       >
         {/* Header with Edit Button */}
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-syne text-[#2D2654]">Business Profile</h2>
+          <h2 className="text-2xl font-syne text-[#062424]">Business Profile</h2>
           {isEditing ? (
             <div className="flex gap-4">
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-4 py-2 bg-[#666ED2] text-white rounded-lg hover:bg-[#666ED2]/90 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#1a6363] text-white rounded-lg hover:bg-[#1a6363]/90 transition-colors"
               >
                 <Save size={18} />
                 Save Changes
               </button>
               <button
                 onClick={handleCancel}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#062424]/5 text-[#062424] rounded-lg hover:bg-[#062424]/10 transition-colors"
               >
                 <X size={18} />
                 Cancel
@@ -127,7 +130,7 @@ export const Account: React.FC = () => {
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#666ED2] text-white rounded-lg hover:bg-[#666ED2]/90 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#1a6363] text-white rounded-lg hover:bg-[#1a6363]/90 transition-colors"
             >
               <Edit2 size={18} />
               Edit Profile
@@ -136,9 +139,9 @@ export const Account: React.FC = () => {
         </div>
 
         {/* Profile Header */}
-        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100">
+        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-[#1a6363]/10">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-full bg-[#666ED2]/10 flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 rounded-full bg-[#1a6363]/10 flex items-center justify-center overflow-hidden">
               {(previewLogo || profile.logo) ? (
                 <img 
                   src={previewLogo || profile.logo}
@@ -146,7 +149,7 @@ export const Account: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User size={40} className="text-[#666ED2]" />
+                <User size={40} className="text-[#1a6363]" />
               )}
             </div>
             {isEditing && (
@@ -162,19 +165,10 @@ export const Account: React.FC = () => {
             )}
           </div>
           <div>
-            {isEditing ? (
-              <input
-                type="text"
-                value={editedProfile.businessName}
-                onChange={(e) => setEditedProfile({ ...editedProfile, businessName: e.target.value })}
-                className="text-2xl font-syne text-[#2D2654] mb-2 p-2 rounded-lg border border-gray-200 focus:border-[#666ED2] outline-none"
-              />
-            ) : (
-              <h1 className="text-2xl font-syne text-[#2D2654] mb-2">
-                {profile.businessName}
-              </h1>
-            )}
-            <p className="text-gray-500 font-raleway">
+            <h1 className="text-2xl font-syne text-[#062424] mb-2">
+              {profile.businessName}
+            </h1>
+            <p className="text-[#062424]/60 font-raleway">
               {profile.businessType} · {profile.businessCategory}
             </p>
           </div>
@@ -184,7 +178,7 @@ export const Account: React.FC = () => {
         <div className="space-y-8">
           {/* Business Information */}
           <div>
-            <h2 className="text-xl font-syne text-[#2D2654] mb-4">Business Information</h2>
+            <h2 className="text-xl font-syne text-[#062424] mb-4">Business Information</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {[
                 { icon: <Building2 />, label: 'Business Name', field: 'businessName' },
@@ -192,12 +186,12 @@ export const Account: React.FC = () => {
                 { icon: <Globe />, label: 'Business Type', field: 'businessType' },
                 { icon: <Building2 />, label: 'Category', field: 'businessCategory' }
               ].map((item, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                  <div className="p-2 rounded-lg bg-[#666ED2]/10 text-[#666ED2]">
+                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-[#062424]/5">
+                  <div className="p-2 rounded-lg bg-[#1a6363]/10 text-[#1a6363]">
                     {item.icon}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-gray-500 font-raleway mb-1">{item.label}</p>
+                    <p className="text-sm text-[#062424]/60 font-raleway mb-1">{item.label}</p>
                     {renderField(item.label, profile[item.field], item.field)}
                   </div>
                 </div>
@@ -207,19 +201,19 @@ export const Account: React.FC = () => {
 
           {/* Contact Information */}
           <div>
-            <h2 className="text-xl font-syne text-[#2D2654] mb-4">Contact Information</h2>
+            <h2 className="text-xl font-syne text-[#062424] mb-4">Contact Information</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {[
                 { icon: <MapPin />, label: 'Country', field: 'country' },
                 { icon: <Phone />, label: 'Phone Number', field: 'phoneNumber' },
                 { icon: <Mail />, label: 'Email', field: 'email' }
               ].map((item, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                  <div className="p-2 rounded-lg bg-[#666ED2]/10 text-[#666ED2]">
+                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-[#062424]/5">
+                  <div className="p-2 rounded-lg bg-[#1a6363]/10 text-[#1a6363]">
                     {item.icon}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-gray-500 font-raleway mb-1">{item.label}</p>
+                    <p className="text-sm text-[#062424]/60 font-raleway mb-1">{item.label}</p>
                     {renderField(item.label, profile[item.field], item.field)}
                   </div>
                 </div>

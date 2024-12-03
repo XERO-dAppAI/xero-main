@@ -1,87 +1,73 @@
-import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import xeroLogo from '../assets/xero.png';
+import { useEffect } from 'react';
 
 interface LoadingTransitionProps {
   onComplete: () => void;
 }
 
 export const LoadingTransition: React.FC<LoadingTransitionProps> = ({ onComplete }) => {
-  const [progress, setProgress] = useState(0);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(onComplete, 500);
-          return 100;
-        }
-        return prev + 0.5;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
+    const timer = setTimeout(onComplete, 2000);
+    return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
     <motion.div
-      className="fixed inset-0 bg-white flex flex-col items-center justify-center"
+      className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative mb-16"
-      >
+      {/* Loading Icon */}
+      <div className="mb-8 relative">
         <motion.div
-          className="absolute -inset-8 rounded-full"
+          className="w-16 h-16 rounded-full border-4 border-[#062424]/20 border-t-[#1a6363]"
           animate={{ 
-            boxShadow: ['0 0 20px rgba(102, 110, 210, 0.2)', '0 0 40px rgba(102, 110, 210, 0.4)', '0 0 20px rgba(102, 110, 210, 0.2)'],
+            rotate: 360
           }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
+          transition={{
+            duration: 1,
+            ease: "linear",
+            repeat: Infinity
           }}
         />
-        <motion.img 
-          src={xeroLogo} 
-          alt="XERO" 
-          className="w-48 h-48 relative z-10"
-          animate={{ 
-            scale: [1, 1.05, 1],
-            rotate: [0, 5, -5, 0]
-          }}
-          transition={{ 
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
-
-      <div className="w-80">
-        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-[#666ED2] rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-        <motion.p 
-          className="text-[#2D2654]/60 text-sm mt-4 text-center font-raleway"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          Loading your dashboard...
-        </motion.p>
       </div>
+
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-syne text-[#062424] mb-2">
+          Loading your dashboard...
+        </h2>
+      </div>
+
+      {/* Progress Bar Container */}
+      <div className="w-[300px] h-2 bg-[#062424]/10 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-gradient-to-r from-[#062424] to-[#1a6363] rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{
+            duration: 2,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      {/* Background Animation */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(26,99,99,0.03) 0%, transparent 70%)',
+        }}
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.5, 0.8, 0.5],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
     </motion.div>
   );
 }; 

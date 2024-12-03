@@ -1,0 +1,17 @@
+{
+  "data_aggregator": {
+    "ic": "sxorg-cqaaa-aaaaj-qnevq-cai"
+  },
+  "inventory": {
+    "ic": "scjal-dyaaa-aaaaj-qnewa-cai"
+  },
+  "ledger": {
+    "ic": "sfig7-oaaaa-aaaaj-qnewq-cai"
+  },
+  "price_engine": {
+    "ic": "smlnd-yiaaa-aaaaj-qnexa-cai"
+  },
+  "xero_frontend": {
+    "ic": "slklx-vqaaa-aaaaj-qnexq-cai"
+  }
+}

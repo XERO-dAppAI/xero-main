@@ -22,10 +22,11 @@ interface PriceItem {
   category: string;
   original_price: number;
   current_price: number;
-  expiry_date: string;
-  quantity: number;
   suggested_discount: number;
   days_until_expiry: number;
+  status: string;
+  expiry_date: string;
+  quantity: number;
 }
 
 interface PriceRules {
@@ -55,6 +56,7 @@ export const PriceEngine: React.FC = () => {
     selectedCategory: 'all',
     applyToCategory: false
   });
+  const [principalId, setPrincipalId] = useState<string>('');
 
   // Load saved data on mount
   useEffect(() => {
@@ -89,7 +91,9 @@ export const PriceEngine: React.FC = () => {
         current_price: 3.99,
         suggested_discount: 0,
         days_until_expiry: -256,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       },
       {
         item_id: crypto.randomUUID(),
@@ -99,7 +103,9 @@ export const PriceEngine: React.FC = () => {
         current_price: 2.49,
         suggested_discount: 0,
         days_until_expiry: -261,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       },
       {
         item_id: crypto.randomUUID(),
@@ -109,7 +115,9 @@ export const PriceEngine: React.FC = () => {
         current_price: 8.99,
         suggested_discount: 0,
         days_until_expiry: -259,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       },
       {
         item_id: crypto.randomUUID(),
@@ -119,7 +127,9 @@ export const PriceEngine: React.FC = () => {
         current_price: 0.49,
         suggested_discount: 0,
         days_until_expiry: -263,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       },
       {
         item_id: crypto.randomUUID(),
@@ -129,7 +139,9 @@ export const PriceEngine: React.FC = () => {
         current_price: 3.99,
         suggested_discount: 0,
         days_until_expiry: -251,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       },
       {
         item_id: crypto.randomUUID(),
@@ -139,12 +151,14 @@ export const PriceEngine: React.FC = () => {
         current_price: 2.99,
         suggested_discount: 0,
         days_until_expiry: -291,
-        status: 'Expired'
+        status: 'Expired',
+        expiry_date: '2023-01-01',
+        quantity: 100
       }
     ];
 
     // Set the items directly
-    setItems(sampleData);
+    setItems(sampleData as PriceItem[]);
 
     // Create ledger entry
     const ledgerEntry = {
@@ -559,6 +573,9 @@ export const PriceEngine: React.FC = () => {
                           className="w-24 p-1 border rounded"
                           step="0.01"
                           min="0"
+                          title="Current Price"
+                          aria-label="Current Price"
+                          placeholder="Enter price"
                         />
                       ) : (
                         `$${item.current_price.toFixed(2)}`
@@ -574,6 +591,9 @@ export const PriceEngine: React.FC = () => {
                           step="1"
                           min="0"
                           max="100"
+                          title="Suggested Discount"
+                          aria-label="Suggested Discount"
+                          placeholder="Enter discount"
                         />
                       ) : (
                         <span className="text-[#666ED2]">
@@ -661,6 +681,8 @@ export const PriceEngine: React.FC = () => {
                     value={priceRules.selectedCategory}
                     onChange={(e) => setPriceRules({...priceRules, selectedCategory: e.target.value})}
                     className="w-full p-2 border rounded"
+                    title="Select Category"
+                    aria-label="Select Category"
                   >
                     {getUniqueCategories().map(category => (
                       <option key={category} value={category}>

@@ -60,4 +60,53 @@
 .dark-purple-glow {
   background: rgba(43, 40, 84, 0.4); /* Using our primary color with opacity */
   filter: blur(20px);
-} 
+}
+
+@keyframes windshield {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-windshield {
+  animation: windshield 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-windshield::before {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes border-glow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+  

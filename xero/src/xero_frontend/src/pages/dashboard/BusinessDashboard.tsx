@@ -29,9 +29,10 @@ import { AIAssistant } from './AIAssistant';
 import confetti from 'canvas-confetti';
 import { toast } from 'react-hot-toast';
 import { BusinessProfile } from '../../types/business';
+import { League } from './League';
 
 interface SearchResult {
-  type: 'inventory' | 'ledger' | 'analytics' | 'price-engine';
+  type: 'inventory' | 'ledger' | 'analytics' | 'price-engine' | 'league';
   title: string;
   description: string;
   icon: JSX.Element;
@@ -40,7 +41,7 @@ interface SearchResult {
 
 interface SearchableItem {
   id: string;
-  type: 'inventory' | 'ledger' | 'analytics' | 'price-engine';
+  type: 'inventory' | 'ledger' | 'analytics' | 'price-engine' | 'league';
   title: string;
   description: string;
   tags?: string[];
@@ -267,6 +268,15 @@ export const BusinessDashboard: React.FC = () => {
         description: 'Set up dynamic pricing rules',
         tags: ['dynamic pricing', 'automation', 'price adjustments'],
         section: 'price engine'
+      },
+      // League Items
+      {
+        id: 'league-1',
+        type: 'league',
+        title: 'XERO League',
+        description: 'Compete with other businesses and earn rewards',
+        tags: ['league', 'competition', 'rewards'],
+        section: 'league'
       }
     ];
   };
@@ -281,6 +291,8 @@ export const BusinessDashboard: React.FC = () => {
         return <BarChart3 size={20} className="text-[#666ED2]" />;
       case 'price-engine':
         return <Tags size={20} className="text-[#666ED2]" />;
+      case 'league':
+        return <Trophy size={20} className="text-[#666ED2]" />;
       default:
         return <Search size={20} className="text-[#666ED2]" />;
     }
@@ -315,6 +327,15 @@ export const BusinessDashboard: React.FC = () => {
 
     setSearchResults(searchResults);
     setShowSearchResults(true);
+  };
+
+  const handleFeatureClick = (featureTitle: string) => {
+    switch (featureTitle) {
+      case 'XERO League':
+        handleSectionChange('league');
+        break;
+      // Add other cases as needed
+    }
   };
 
   const renderContent = (): JSX.Element => {
@@ -424,17 +445,17 @@ export const BusinessDashboard: React.FC = () => {
                   {
                     title: 'XERO Marketplace',
                     description: 'Connect with suppliers and expand your business network',
-                    icon: <Tags className="text-[#666ED2]" size={24} />
+                    icon: <Tags className="text-[#1a6363]" size={24} />
                   },
                   {
                     title: 'XEROW Coin',
                     description: 'Exclusive cryptocurrency for XERO ecosystem',
-                    icon: <Wallet className="text-[#666ED2]" size={24} />
+                    icon: <Wallet className="text-[#1a6363]" size={24} />
                   },
                   {
                     title: 'XERO League',
                     description: 'Compete with other businesses and earn rewards',
-                    icon: <Trophy className="text-[#666ED2]" size={24} />
+                    icon: <Trophy className="text-[#1a6363]" size={24} />
                   }
                 ].map((feature, index) => (
                   <motion.div
@@ -442,13 +463,14 @@ export const BusinessDashboard: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="p-6 rounded-xl bg-[#F8F9FF] border border-transparent hover:border-[#666ED2]/30 transition-all"
+                    className="p-6 rounded-xl bg-[#e6f2f2] border border-transparent hover:border-[#1a6363]/30 transition-all cursor-pointer"
+                    onClick={() => handleFeatureClick(feature.title)}
                   >
                     <div className="p-3 bg-white rounded-lg w-fit mb-4">
                       {feature.icon}
                     </div>
-                    <h3 className="font-syne text-[#2D2654] mb-2">{feature.title}</h3>
-                    <p className="text-gray-500 text-sm">{feature.description}</p>
+                    <h3 className="font-syne text-[#062424] mb-2">{feature.title}</h3>
+                    <p className="text-[#062424]/60 text-sm">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -456,7 +478,7 @@ export const BusinessDashboard: React.FC = () => {
               <div className="text-center">
                 <button
                   onClick={handleWaitlistClick}
-                  className="px-8 py-3 bg-[#666ED2] text-white rounded-xl flex items-center gap-2 mx-auto hover:bg-[#666ED2]/90 transition-colors"
+                  className="px-8 py-3 bg-[#1a6363] text-white rounded-xl flex items-center gap-2 mx-auto hover:bg-[#1a6363]/90 transition-colors"
                 >
                   <Mail size={20} />
                   Join the Waitlist
@@ -468,6 +490,8 @@ export const BusinessDashboard: React.FC = () => {
             </div>
           </div>
         );
+      case 'league':
+        return <League />;
       default:
         return <div>Section not found</div>;
     }
