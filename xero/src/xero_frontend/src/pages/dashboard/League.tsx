@@ -9,6 +9,7 @@ import game7 from '../../assets/game7.png';
 import game8 from '../../assets/game8.png';
 import { Star as StarIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import confetti from 'canvas-confetti';
 
 interface Game {
   id: string;
@@ -94,32 +95,79 @@ const getQuestContent = (gameId: string) => {
       };
     case '2':
       return {
-        title: 'Share XERO',
-        description: 'Help us grow our community! Share your unique referral code and invite others to join our mission against food waste.',
+        title: 'Join the XERO Alliance',
+        description: '',
         referralCode,
-        shareMessage: `Join me in the fight against food waste with XERO! 
+        shareMessage: `🌟 Join the XERO Alliance! 
 
-We're building a community dedicated to reducing food waste through innovative solutions.
+Level up your business and become a Food Waste Warrior! 🎮
 
-Use my referral code: ${referralCode}
+Use my special activation code to begin your journey:
+${referralCode}
 
-Join here: https://xero.com/join`,
+Join the mission: https://xero.com/join
+
+#XEROAlliance #FoodWasteWarrior ⚔️`,
         needsProof: false,
-        isReferralQuest: true
+        isReferralQuest: true,
+        shareImage: game2
       };
     case '3':
       return {
-        title: 'Market Flow Analysis',
-        description: 'Master the art of market analytics and demand prediction. Learn to read market patterns and optimize your inventory management.',
+        title: 'The Gathering of Sacred Ingredients',
+        description: `Your mission: Venture into our partnered supermarkets and collect sacred ingredients! 🌟
+
+• Find imperfect produce 🍎
+• Choose minimal packaging ✨
+• Purchase in bulk 📦
+• Save near-expiry items ⚔️`,
         needsProof: true,
-        uploadText: 'Upload completion proof'
+        uploadText: 'Upload purchase receipt',
+        reward: '200 XEROW',
+        requirements: [
+          'Visit a XERO-partnered supermarket',
+          'Purchase sustainable items',
+          'Upload receipt as proof'
+        ]
       };
     case '4':
       return {
-        title: 'Dynamic Pricing Challenge',
-        description: 'Learn and implement dynamic pricing strategies for near-expiry items to minimize waste while maintaining profitability.',
-        needsProof: true,
-        uploadText: 'Upload completion proof'
+        title: 'The Food Waste Wisdom Challenge',
+        description: `The XERO Guild needs you! 🌟 To become a true hero in the battle against food waste, you must show your wisdom in this food waste trivia challenge. Test your knowledge and earn your reward! 🧠✨`,
+        needsProof: false,
+        isQuizQuest: true,
+        questions: [
+          {
+            text: 'What percentage of food produced globally is wasted by businesses each year?',
+            options: [
+              { id: 'A', text: '10%', hint: 'A small number, but still plenty of food slipping through the cracks!' },
+              { id: 'B', text: '20%', hint: 'Almost a fifth of all food! That\'s a lot of potential waste.' },
+              { id: 'C', text: '30%', hint: 'A third of all food produced globally is wasted! A serious problem for businesses and the planet.' }
+            ],
+            correctAnswer: 'C',
+            explanation: 'Around 30% of food produced globally is wasted each year, much of it by businesses due to overproduction, spoilage, and inefficiencies in supply chains.'
+          },
+          {
+            text: 'What is the biggest problem businesses face when it comes to food waste?',
+            options: [
+              { id: 'A', text: 'Expiring Products', hint: 'Items left on shelves too long, reaching their expiry date.' },
+              { id: 'B', text: 'Poor Demand Forecasting', hint: 'Not knowing how much food to buy or prepare leads to excess.' },
+              { id: 'C', text: 'Lack of Storage Space', hint: 'Having enough room to keep everything fresh and safe.' }
+            ],
+            correctAnswer: 'B',
+            explanation: 'Many businesses overestimate demand, resulting in excess food that ends up wasted due to spoilage. Accurate forecasting can reduce this.'
+          },
+          {
+            text: 'Which country wastes the most food annually?',
+            options: [
+              { id: 'A', text: 'United States', hint: 'A country of plenty, but a shocking amount of food goes to waste.' },
+              { id: 'B', text: 'Japan', hint: 'Even Japan, known for its precision, struggles with food waste.' },
+              { id: 'C', text: 'India', hint: 'A country with one of the highest levels of food insecurity, but also significant food loss.' }
+            ],
+            correctAnswer: 'A',
+            explanation: 'The US is one of the leading countries in food waste, with around 40% of food produced being wasted each year, much of it at the consumer and business level.'
+          }
+        ]
       };
     case '5':
       return {
@@ -168,6 +216,19 @@ Join here: https://xero.com/join`,
   };
 };
 
+// Add these helper functions
+const triggerSuccessEffect = () => {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 }
+  });
+};
+
+const triggerErrorEffect = () => {
+  // Shake animation will be handled by motion
+};
+
 export const League: React.FC = () => {
   const [currentGameIndex, setCurrentGameIndex] = useState(0);
   const [showGames, setShowGames] = useState(false);
@@ -189,6 +250,23 @@ export const League: React.FC = () => {
   const [isVerificationComplete, setIsVerificationComplete] = useState(false);
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [hasCodeBeenCopied, setHasCodeBeenCopied] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [revealedHints, setRevealedHints] = useState<Set<string>>(new Set());
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({});
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [questReward, setQuestReward] = useState<number>(0); // Start at 0 and increment based on performance
+  const [deductions, setDeductions] = useState<string[]>([]); // Track reasons for deductions
+  const [showHintConfirm, setShowHintConfirm] = useState<string | null>(null);
+
+  // Add new state variables for Quest 3
+  const [quest3Image, setQuest3Image] = useState<File | null>(null);
+  const [quest3ImagePreview, setQuest3ImagePreview] = useState<string | null>(null);
+  const [quest3IsAnalyzing, setQuest3IsAnalyzing] = useState(false);
+  const [quest3IsVerified, setQuest3IsVerified] = useState(false);
+
+  // Add new state for tracking correct answers
+  const [correctAnswers, setCorrectAnswers] = useState<number>(0);
 
   const games: Game[] = [
     {
@@ -213,23 +291,23 @@ export const League: React.FC = () => {
     },
     {
       id: '3',
-      title: 'Market Flow Mastery',
-      description: 'Harness the power of market analytics to predict demand patterns! Become one with the flow of supply and demand to prevent overstock and reduce waste. The market whispers its secrets... 📊⚡',
-      reward: '75 XEROW',
-      rating: 9.05,
-      episodes: 10,
+      title: 'The Gathering of Sacred Ingredients',
+      description: 'Embark on a mystical quest to rescue imperfect produce and master the art of sustainable shopping! Seek out unconventional ingredients and prove your worth to the XERO Guild. 🍎✨',
+      reward: '200 XEROW',
+      rating: 9.1,
+      episodes: 15,
       image: game3,
-      difficulty: 'Hard'
+      difficulty: 'Medium'
     },
     {
       id: '4',
-      title: 'Price Harmony Saga',
-      description: 'Balance the delicate art of pricing near-expiry items! Your mission: Save food from waste while maintaining profit harmony. Master dynamic pricing techniques! 💫💰',
-      reward: '120 XEROW',
-      rating: 8.94,
-      episodes: 18,
+      title: 'The Food Waste Wisdom Challenge',
+      description: 'Test your knowledge in this mystical food waste trivia challenge! Answer wisely, as each hint will cost you precious XEROW coins. 🧠✨',
+      reward: '300 XEROW',
+      rating: 9.2,
+      episodes: 3,
       image: game4,
-      difficulty: 'Medium'
+      difficulty: 'Hard'
     },
     {
       id: '5',
@@ -374,6 +452,53 @@ export const League: React.FC = () => {
   };
 
   const handlePlayNow = (game: Game) => {
+    // Check if game is 5 or higher (future games)
+    if (parseInt(game.id) >= 5) {
+      toast.custom((t) => (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-[#1a1a1a] p-4 rounded-xl border border-[#1a6363]/20 shadow-xl max-w-md w-[90%] mx-auto"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-[#1a6363]/20">
+              <svg 
+                className="w-6 h-6 text-[#1a6363]" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" 
+              />
+            </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-white font-medium mb-1">Coming Soon!</h3>
+              <p className="text-white/70 text-sm">
+                The blockchain queens are behind the scenes crafting more gaming episodes. Stay tuned for epic challenges! ✨
+              </p>
+            </div>
+            <button 
+              onClick={() => toast.dismiss(t.id)}
+              className="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/60 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </motion.div>
+      ), {
+        duration: 3000,
+        position: 'top-center',
+      });
+      return;
+    }
+
+    // Rest of the existing handlePlayNow logic
     // Check if previous challenge is completed (except for first challenge)
     const gameIndex = games.findIndex(g => g.id === game.id);
     if (gameIndex > 0) {
@@ -397,8 +522,20 @@ export const League: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Please upload a valid receipt image or PDF');
+        return;
+      }
+
       setProofImage(file);
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
     }
@@ -437,6 +574,74 @@ Join here: https://xero.com/join
     } else {
       navigator.clipboard.writeText(referralMessage);
       toast.success('Referral message copied to clipboard!');
+    }
+  };
+
+  const handleHintReveal = (e: React.MouseEvent, questionIndex: number, optionId: string) => {
+    e.stopPropagation();
+    setRevealedHints(prev => new Set([...prev, `${questionIndex}-${optionId}`]));
+    // Deduct 10 XEROW for using a hint
+    setQuestReward(prev => prev - 10);
+    setDeductions(prev => [...prev, `Used hint (-10 XEROW)`]);
+  };
+
+  const handleAnswerSelect = (option: any) => {
+    if (!selectedAnswers[currentQuestionIndex]) {
+      setSelectedAnswers(prev => ({
+        ...prev,
+        [currentQuestionIndex]: option.id
+      }));
+      setShowExplanation(true);
+
+      if (option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer) {
+        // Correct answer
+        triggerSuccessEffect();
+        setCorrectAnswers(prev => prev + 1);
+        // Each correct answer is worth 100 XEROW
+        setQuestReward(prev => prev + 100);
+      } else {
+        // Wrong answer - deduct 20 XEROW
+        triggerErrorEffect();
+        setQuestReward(prev => prev - 20);
+        setDeductions(prev => [...prev, `Wrong answer (-20 XEROW)`]);
+      }
+    }
+  };
+
+  // Add a new handler for Quest 3 image upload
+  const handleQuest3ImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Please upload a valid receipt image or PDF');
+        return;
+      }
+
+      setQuest3Image(file);
+      const previewUrl = URL.createObjectURL(file);
+      setQuest3ImagePreview(previewUrl);
+    }
+  };
+
+  // Add a new handler for Quest 3 verification
+  const handleQuest3Verification = async () => {
+    setQuest3IsAnalyzing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setQuest3IsVerified(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setQuest3IsAnalyzing(false);
+    setIsVerificationComplete(true);
+    
+    if (selectedGame) {
+      setCompletedChallenges(prev => new Set([...prev, selectedGame.id]));
     }
   };
 
@@ -856,160 +1061,759 @@ Join here: https://xero.com/join
                 </p>
               </div>
 
-              {getQuestContent(selectedGame.id)?.isReferralQuest ? (
-                // Referral Quest Content
-                <div className="space-y-4">
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <div className="text-sm text-white/60 mb-2">Your Referral Code:</div>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-black/20 px-3 py-2 rounded-lg text-[#1a6363] font-mono">
-                        {getQuestContent(selectedGame.id)?.referralCode}
-                      </code>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          const shareMessage = getQuestContent(selectedGame.id)?.shareMessage;
-                          if (shareMessage) {
-                            navigator.clipboard.writeText(shareMessage);
-                            toast.success('Referral message copied!');
-                            // Auto complete the quest when copied
-                            if (selectedGame) {
-                              setCompletedChallenges(prev => new Set([...prev, selectedGame.id]));
-                              setShowChallenge(false);
-                              setIsVerificationComplete(true);
-                            }
-                          }
-                        }}
-                        className="p-2 bg-[#1a6363]/20 rounded-lg text-[#1a6363]"
+              {selectedGame?.id === '1' ? (
+                // Social Media Quest Content
+                <>
+                  <div className="space-y-3">
+                    {getQuestContent('1')?.buttons?.map((button, index) => (
+                      <a 
+                        key={index}
+                        href={button.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/90"
                       >
-                        <Copy size={20} />
-                      </motion.button>
+                        <div className="p-2 rounded-lg bg-[#1a6363]/20">
+                          {button.icon}
+                        </div>
+                        {button.title}
+                      </a>
+                    ))}
+                  </div>
+                  
+                  {/* Upload Proof Section for Quest 1 */}
+                  <div>
+                    {imagePreview ? (
+                      <div className="relative rounded-lg overflow-hidden aspect-video">
+                        <img 
+                          src={imagePreview} 
+                          alt="Proof" 
+                          className="w-full h-full object-contain bg-black/50"
+                        />
+                        
+                        {isAnalyzing && (
+                          <>
+                            {/* Existing scanning animation code */}
+                            <motion.div 
+                              className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 to-transparent"
+                              animate={{
+                                y: ['0%', '100%', '0%'],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "linear"
+                              }}
+                            />
+                            
+                            <div className="absolute inset-0 border-2 border-[#1a6363]/50">
+                              <motion.div
+                                className="absolute top-0 left-0 w-20 h-20"
+                                animate={{
+                                  x: ['0%', '100%'],
+                                  y: ['0%', '100%']
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  repeatType: "reverse",
+                                  ease: "linear"
+                                }}
+                              >
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-[#1a6363]" />
+                                <div className="absolute top-0 right-0 w-0.5 h-full bg-[#1a6363]" />
+                              </motion.div>
+                            </div>
+                            
+                            <div className="absolute bottom-4 left-4 right-4">
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-sm text-[#1a6363] font-mono"
+                              >
+                                Analyzing proof... {isVerified ? '100%' : ''}
+                              </motion.div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-white/10 hover:border-[#1a6363]/50 transition-colors cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <div className="p-3 rounded-full bg-[#1a6363]/20">
+                          <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span className="text-white/70 text-sm">
+                          {getQuestContent(selectedGame.id)?.uploadText}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Verify Button for Quest 1 */}
+                  <motion.button
+                    className={`
+                      w-full py-3 rounded-lg font-medium tracking-wider
+                      ${imagePreview 
+                        ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
+                        : 'bg-white/5 text-white/30 cursor-not-allowed'
+                      }
+                      transition-colors
+                    `}
+                    disabled={!imagePreview || isAnalyzing}
+                    onClick={handleVerification}
+                  >
+                    {isAnalyzing ? 'Verifying...' : 'Verify Quest'}
+                  </motion.button>
+                </>
+              ) : selectedGame?.id === '2' ? (
+                // Referral Quest Content
+                <div className="h-full flex flex-col">
+                  {/* Preview Card */}
+                  <div className="flex-1 bg-[#1a1a1a] p-4 rounded-lg overflow-hidden">
+                    <img 
+                      src={game2} 
+                      alt="XERO Community" 
+                      className="w-full h-40 object-cover rounded-lg mb-3"
+                    />
+                    <div className="text-white/70 text-sm whitespace-pre-line max-h-[120px] overflow-y-auto">
+                      {getQuestContent('2')?.shareMessage}
                     </div>
                   </div>
 
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <div className="text-sm text-white/60 mb-2">Share Message:</div>
-                    <p className="text-white/90 text-sm whitespace-pre-line">
-                      {getQuestContent(selectedGame.id)?.shareMessage}
-                    </p>
+                  {/* Action Buttons - Side by Side */}
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    {/* Copy Message Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        const shareMessage = getQuestContent('2')?.shareMessage;
+                        if (shareMessage) {
+                          navigator.clipboard.writeText(shareMessage);
+                          toast.success('Message copied!');
+                          setHasCodeBeenCopied(true); // Set copied state to true
+                        }
+                      }}
+                      className={`
+                        p-2.5 rounded-lg relative overflow-hidden group
+                        backdrop-blur-md 
+                        border-l-2
+                        shadow-inner
+                        font-medium 
+                        tracking-wider
+                        bg-emerald-900/20 border-emerald-400/40 text-emerald-300/90
+                        clip-path-polygon
+                        text-sm
+                      `}
+                      style={{
+                        clipPath: 'polygon(0 0, 100% 0, 95% 100%, 0% 100%)',
+                        boxShadow: 'inset 0 0 20px rgba(255, 255, 255, 0.1)'
+                      }}
+                    >
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 overflow-hidden">
+                        <motion.div 
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                          animate={{
+                            x: ['-100%', '100%'],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "linear"
+                          }}
+                        />
+                      </div>
+                      <div className="relative flex items-center justify-center gap-2">
+                        <Copy size={16} />
+                        <span>Copy Code</span>
+                      </div>
+                    </motion.button>
+
+                    {/* Complete Quest Button */}
+                    <motion.button
+                      whileHover={{ scale: hasCodeBeenCopied ? 1.02 : 1 }}
+                      whileTap={{ scale: hasCodeBeenCopied ? 0.98 : 1 }}
+                      onClick={() => {
+                        if (hasCodeBeenCopied) {
+                          setCompletedChallenges(prev => new Set([...prev, '2']));
+                          setShowChallenge(false);
+                          setIsVerificationComplete(true);
+                        }
+                      }}
+                      className={`
+                        p-2.5 rounded-lg relative overflow-hidden group
+                        backdrop-blur-md 
+                        border-l-2
+                        shadow-inner
+                        font-medium 
+                        tracking-wider
+                        ${hasCodeBeenCopied 
+                          ? 'bg-red-900/20 border-red-400/40 text-red-300/90 cursor-pointer'
+                          : 'bg-gray-900/20 border-gray-400/20 text-gray-400/50 cursor-not-allowed'
+                        }
+                        clip-path-polygon
+                        text-sm
+                      `}
+                      style={{
+                        clipPath: 'polygon(0 0, 100% 0, 95% 100%, 0% 100%)',
+                        boxShadow: 'inset 0 0 20px rgba(255, 255, 255, 0.1)'
+                      }}
+                    >
+                      {/* Shine effect - only show if button is active */}
+                      {hasCodeBeenCopied && (
+                        <div className="absolute inset-0 overflow-hidden">
+                          <motion.div 
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                            animate={{
+                              x: ['-100%', '100%'],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "linear"
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="relative flex items-center justify-center gap-2">
+                        <Trophy size={16} />
+                        <span>Complete</span>
+                      </div>
+                    </motion.button>
                   </div>
                 </div>
-              ) : selectedGame?.id === '1' ? (
-                // Social Media Quest Content
-                <div className="space-y-3">
-                  {getQuestContent('1')?.buttons?.map((button, index) => (
-                    <a 
-                      key={index}
-                      href={button.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/90"
-                    >
-                      <div className="p-2 rounded-lg bg-[#1a6363]/20">
-                        {button.icon}
+              ) : selectedGame?.id === '3' ? (
+                // Standard Quest Content with Upload
+                getQuestContent('3')?.needsProof && (
+                  <>
+                    <div className="space-y-4">
+                      {/* Requirements List */}
+                      <div className="bg-[#1a1a1a] p-4 rounded-lg">
+                        <h4 className="text-white/90 text-sm font-medium mb-2">Quest Requirements:</h4>
+                        <ul className="space-y-2">
+                          {getQuestContent('3')?.requirements.map((req, index) => (
+                            <li key={index} className="flex items-center gap-2 text-sm text-white/70">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#1a6363]" />
+                              {req}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      {button.title}
-                    </a>
-                  ))}
+
+                      {/* Upload Section */}
+                      <div>
+                        {quest3ImagePreview ? (
+                          <div className="relative rounded-lg overflow-hidden aspect-video">
+                            <img 
+                              src={quest3ImagePreview} 
+                              alt="Receipt" 
+                              className="w-full h-full object-contain bg-black/50"
+                            />
+                            
+                            {quest3IsAnalyzing && (
+                              <>
+                                <motion.div 
+                                  className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 via-transparent to-[#1a6363]/20"
+                                  animate={{
+                                    y: ['0%', '100%', '0%'],
+                                  }}
+                                  transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "linear"
+                                  }}
+                                />
+                                
+                                <div className="absolute bottom-4 left-4 right-4">
+                                  <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-sm font-mono"
+                                    style={{
+                                      color: '#1a6363',
+                                      textShadow: '0 0 10px rgba(26,99,99,0.5)'
+                                    }}
+                                  >
+                                    Verifying receipt... {quest3IsVerified ? '100%' : ''}
+                                  </motion.div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed border-[#1a6363]/30 hover:border-[#1a6363]/50 transition-colors bg-[#1a6363]/5 cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*,.pdf,.jpg,.jpeg,.png,.heic"
+                              onChange={handleQuest3ImageUpload}
+                              className="hidden"
+                            />
+                            <div className="p-3 rounded-full bg-[#1a6363]/20">
+                              <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <span className="text-[#1a6363] text-sm font-medium">
+                              Click to upload receipt
+                            </span>
+                            <span className="text-[#1a6363]/60 text-xs">
+                              Supports: JPG, PNG, PDF
+                            </span>
+                          </label>
+                        )}
+                      </div>
+
+                      {/* Verify Button */}
+                      <motion.button
+                        className={`
+                          w-full py-3 rounded-lg font-medium tracking-wider
+                          ${quest3ImagePreview 
+                            ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
+                            : 'bg-[#1a6363]/20 text-[#1a6363]/50 cursor-not-allowed'
+                          }
+                          transition-colors
+                        `}
+                        disabled={!quest3ImagePreview || quest3IsAnalyzing}
+                        onClick={handleQuest3Verification}
+                      >
+                        {quest3IsAnalyzing ? 'Verifying Receipt...' : 'Verify Purchase'}
+                      </motion.button>
+                    </div>
+                  </>
+                )
+              ) : selectedGame?.id === '4' && getQuestContent('4')?.isQuizQuest ? (
+                <div className="space-y-4">
+                  {/* Current Question Card */}
+                  <motion.div
+                    key={currentQuestionIndex}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="bg-[#1a1a1a] p-6 rounded-lg relative overflow-hidden"
+                  >
+                    {/* Add ambient glow effect */}
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-br from-[#1a6363]/10 via-transparent to-transparent"
+                      style={{
+                        filter: 'blur(40px)',
+                        transform: 'translate(-50%, -50%) scale(2)',
+                      }}
+                    />
+
+                    {/* Question Progress with enhanced styling */}
+                    <div className="flex justify-between items-center mb-6 relative z-10">
+                      <h4 className="text-white/90 font-medium">
+                        Question {currentQuestionIndex + 1} of {getQuestContent('4')?.questions.length}
+                      </h4>
+                      <div className="flex gap-1">
+                        {getQuestContent('4')?.questions.map((_, index) => (
+                          <motion.div 
+                            key={index}
+                            className={`h-1.5 w-10 rounded-full transition-all duration-300 ${
+                              index === currentQuestionIndex 
+                                ? 'bg-[#1a6363]' 
+                                : index < currentQuestionIndex
+                                ? 'bg-[#1a6363]/50'
+                                : 'bg-white/10'
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Question Text with enhanced styling */}
+                    <motion.p 
+                      className="text-white/90 text-lg mb-6 relative z-10"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      {getQuestContent('4')?.questions[currentQuestionIndex].text}
+                    </motion.p>
+
+                    {/* Options with enhanced interactivity */}
+                    <div className="space-y-3 relative z-10">
+                      {getQuestContent('4')?.questions[currentQuestionIndex].options.map((option) => (
+                        <motion.button
+                          key={option.id}
+                          whileHover={{ scale: 1.02, y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleAnswerSelect(option)}
+                          disabled={!!selectedAnswers[currentQuestionIndex]}
+                          className={`
+                            w-full p-4 rounded-lg relative overflow-hidden group
+                            backdrop-blur-md border-l-2 shadow-inner
+                            font-medium tracking-wider
+                            ${selectedAnswers[currentQuestionIndex] === option.id
+                              ? option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer
+                                ? 'bg-emerald-900/20 border-emerald-400/40 text-emerald-300'
+                                : 'bg-red-900/20 border-red-400/40 text-red-300'
+                              : selectedAnswers[currentQuestionIndex]
+                                ? 'bg-white/5 border-white/10 text-white/30'
+                                : 'bg-white/5 border-white/10 text-white/90 hover:bg-white/10'
+                            }
+                            transition-all duration-300
+                          `}
+                        >
+                          {/* Hover glow effect */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex items-center justify-between relative z-10">
+                            <span className="flex items-center gap-2">
+                              <div className={`
+                                w-6 h-6 rounded-full flex items-center justify-center
+                                ${selectedAnswers[currentQuestionIndex] === option.id
+                                  ? option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer
+                                    ? 'bg-emerald-500/20'
+                                    : 'bg-red-500/20'
+                                  : 'bg-white/10'
+                                }
+                              `}>
+                                {option.id}
+                              </div>
+                              {option.text}
+                            </span>
+
+                            {!revealedHints.has(`${currentQuestionIndex}-${option.id}`) && 
+                             !selectedAnswers[currentQuestionIndex] && (
+                              <motion.button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowHintConfirm(`${currentQuestionIndex}-${option.id}`);
+                                }}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="p-1.5 rounded-full bg-[#1a6363]/20 hover:bg-[#1a6363]/30 transition-colors"
+                              >
+                                <svg 
+                                  className="w-4 h-4 text-[#1a6363]" 
+                                  fill="none" 
+                                  viewBox="0 0 24 24" 
+                                  stroke="currentColor"
+                                >
+                                  <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" 
+                                  />
+                                </svg>
+                              </motion.button>
+                            )}
+                          </div>
+
+                          {/* Hint Confirmation Dialog */}
+                          {showHintConfirm === `${currentQuestionIndex}-${option.id}` && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[100]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowHintConfirm(null);
+                              }}
+                            >
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-[#1a1a1a] p-6 rounded-xl border border-[#1a6363]/20 w-[90%] max-w-sm mx-4 shadow-xl"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="flex items-center justify-between mb-4">
+                                  <h4 className="text-white/90 font-medium">Use Hint?</h4>
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setShowHintConfirm(null)}
+                                    className="p-1 rounded-lg hover:bg-white/5"
+                                  >
+                                    <X size={16} className="text-white/60" />
+                                  </motion.button>
+                                </div>
+                                
+                                <p className="text-white/60 text-sm mb-6">
+                                  This will cost you <span className="text-[#1a6363] font-medium">10 XEROW</span> coins. 
+                                  Are you sure you want to reveal the hint?
+                                </p>
+                                
+                                <div className="flex gap-3">
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setShowHintConfirm(null)}
+                                    className="flex-1 py-2.5 rounded-lg bg-white/5 text-white/70 text-sm hover:bg-white/10 transition-colors"
+                                  >
+                                    Cancel
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={(e) => {
+                                      handleHintReveal(e, currentQuestionIndex, option.id);
+                                      setShowHintConfirm(null);
+                                    }}
+                                    className="flex-1 py-2.5 rounded-lg bg-[#1a6363] text-white text-sm hover:bg-[#1a6363]/90 transition-colors"
+                                  >
+                                    Use Hint
+                                  </motion.button>
+                                </div>
+                              </motion.div>
+                            </motion.div>
+                          )}
+
+                          {/* Hint text display - update the styling */}
+                          {revealedHints.has(`${currentQuestionIndex}-${option.id}`) && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[100]"
+                            >
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-[#1a1a1a] p-6 rounded-xl border border-[#1a6363]/20 w-[90%] max-w-sm mx-4 shadow-xl"
+                              >
+                                <div className="flex items-center justify-between mb-4">
+                                  <h4 className="text-white/90 font-medium">Hint</h4>
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setRevealedHints(prev => {
+                                      const newHints = new Set(prev);
+                                      newHints.delete(`${currentQuestionIndex}-${option.id}`);
+                                      return newHints;
+                                    })}
+                                    className="p-1 rounded-lg hover:bg-white/5"
+                                  >
+                                    <X size={16} className="text-white/60" />
+                                  </motion.button>
+                                </div>
+
+                                <div className="flex items-center gap-2 text-[#1a6363] text-sm mb-3">
+                                  <svg 
+                                    className="w-4 h-4" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                  >
+                                    <path 
+                                      strokeLinecap="round" 
+                                      strokeLinejoin="round" 
+                                      strokeWidth={2} 
+                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                    />
+                                  </svg>
+                                  <span className="font-medium">-10 XEROW Used</span>
+                                </div>
+
+                                <p className="text-white/80 text-sm p-4 bg-[#1a6363]/10 rounded-lg border border-[#1a6363]/20">
+                                  "{option.hint}"
+                                </p>
+
+                                <motion.button
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => setRevealedHints(prev => {
+                                    const newHints = new Set(prev);
+                                    newHints.delete(`${currentQuestionIndex}-${option.id}`);
+                                    return newHints;
+                                  })}
+                                  className="mt-4 w-full py-2.5 rounded-lg bg-[#1a6363] text-white text-sm hover:bg-[#1a6363]/90 transition-colors"
+                                >
+                                  Got it
+                                </motion.button>
+                              </motion.div>
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* Explanation & Next Button with enhanced styling */}
+                    {showExplanation && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-6 p-4 rounded-lg bg-[#1a6363]/10 border border-[#1a6363]/20
+                          backdrop-blur-md relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a6363]/5 to-transparent" />
+                        <p className="text-white/80 text-sm relative z-10 mb-4">
+                          {getQuestContent('4')?.questions[currentQuestionIndex].explanation}
+                        </p>
+
+                        {/* Show deductions if any */}
+                        {deductions.length > 0 && (
+                          <div className="mt-4 p-3 bg-black/20 rounded-lg">
+                            <h5 className="text-white/60 text-xs mb-2">Deductions:</h5>
+                            <ul className="space-y-1">
+                              {deductions.map((deduction, index) => (
+                                <li key={index} className="text-red-400/80 text-xs">
+                                  {deduction}
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="mt-2 pt-2 border-t border-white/10 text-sm">
+                              <span className="text-white/60">Current Reward: </span>
+                              <span className="text-[#1a6363]">{questReward} XEROW</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Next/Complete button */}
+                        {currentQuestionIndex < (getQuestContent('4')?.questions.length || 0) - 1 ? (
+                          <motion.button
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setCurrentQuestionIndex(prev => prev + 1);
+                              setShowExplanation(false);
+                            }}
+                            className="mt-4 w-full py-3 bg-[#1a6363] text-white rounded-lg font-medium
+                              relative overflow-hidden group"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
+                              translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <span className="relative z-10">Next Question</span>
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setCompletedChallenges(prev => new Set([...prev, '4']));
+                              setShowChallenge(false);
+                              setIsVerificationComplete(true);
+                              // Final celebration
+                              confetti({
+                                particleCount: 200,
+                                spread: 100,
+                                origin: { y: 0.6 }
+                              });
+                            }}
+                            className="mt-4 w-full py-3 bg-[#1a6363] text-white rounded-lg font-medium
+                              relative overflow-hidden group"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
+                              translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <span className="relative z-10">
+                              Complete Challenge ({questReward} XEROW)
+                            </span>
+                          </motion.button>
+                        )}
+                      </motion.div>
+                    )}
+                  </motion.div>
                 </div>
               ) : (
                 // Standard Quest Content with Upload
                 getQuestContent(selectedGame.id)?.needsProof && (
                   <>
-                    <div>
-                      {imagePreview ? (
-                        <div className="relative rounded-lg overflow-hidden aspect-video">
-                          <img 
-                            src={imagePreview} 
-                            alt="Proof" 
-                            className="w-full h-full object-contain bg-black/50"
-                          />
-                          
-                          {/* Scanning Animation */}
-                          {isAnalyzing && (
-                            <>
-                              {/* Scanning line */}
-                              <motion.div 
-                                className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 to-transparent"
-                                animate={{
-                                  y: ['0%', '100%', '0%'],
-                                }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  ease: "linear"
-                                }}
-                              />
-                              
-                              {/* Scanning corners */}
-                              <div className="absolute inset-0 border-2 border-[#1a6363]/50">
-                                <motion.div
-                                  className="absolute top-0 left-0 w-20 h-20"
+                    <div className="space-y-4">
+                      {/* Requirements List */}
+                      <div className="bg-[#1a1a1a] p-4 rounded-lg">
+                        <h4 className="text-white/90 text-sm font-medium mb-2">Quest Requirements:</h4>
+                        <ul className="space-y-2">
+                          {getQuestContent('3')?.requirements.map((req, index) => (
+                            <li key={index} className="flex items-center gap-2 text-sm text-white/70">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#1a6363]" />
+                              {req}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Upload Section */}
+                      <div>
+                        {quest3ImagePreview ? (
+                          <div className="relative rounded-lg overflow-hidden aspect-video">
+                            <img 
+                              src={quest3ImagePreview} 
+                              alt="Receipt" 
+                              className="w-full h-full object-contain bg-black/50"
+                            />
+                            
+                            {quest3IsAnalyzing && (
+                              <>
+                                <motion.div 
+                                  className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 via-transparent to-[#1a6363]/20"
                                   animate={{
-                                    x: ['0%', '100%'],
-                                    y: ['0%', '100%']
+                                    y: ['0%', '100%', '0%'],
                                   }}
                                   transition={{
-                                    duration: 2,
+                                    duration: 3,
                                     repeat: Infinity,
-                                    repeatType: "reverse",
                                     ease: "linear"
                                   }}
-                                >
-                                  <div className="absolute top-0 left-0 w-full h-0.5 bg-[#1a6363]" />
-                                  <div className="absolute top-0 right-0 w-0.5 h-full bg-[#1a6363]" />
-                                </motion.div>
-                              </div>
-                              
-                              {/* Analysis Text */}
-                              <div className="absolute bottom-4 left-4 right-4">
-                                <motion.div
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  className="text-sm text-[#1a6363] font-mono"
-                                >
-                                  Analyzing proof... {isVerified ? '100%' : ''}
-                                </motion.div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <label className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-white/10 hover:border-[#1a6363]/50 transition-colors cursor-pointer">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                          />
-                          <div className="p-3 rounded-full bg-[#1a6363]/20">
-                            <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                                />
+                                
+                                <div className="absolute bottom-4 left-4 right-4">
+                                  <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-sm font-mono"
+                                    style={{
+                                      color: '#1a6363',
+                                      textShadow: '0 0 10px rgba(26,99,99,0.5)'
+                                    }}
+                                  >
+                                    Verifying receipt... {quest3IsVerified ? '100%' : ''}
+                                  </motion.div>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          <span className="text-white/70 text-sm">
-                            {getQuestContent(selectedGame.id)?.uploadText}
-                          </span>
-                        </label>
-                      )}
-                    </div>
+                        ) : (
+                          <label className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed border-[#1a6363]/30 hover:border-[#1a6363]/50 transition-colors bg-[#1a6363]/5 cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*,.pdf,.jpg,.jpeg,.png,.heic"
+                              onChange={handleQuest3ImageUpload}
+                              className="hidden"
+                            />
+                            <div className="p-3 rounded-full bg-[#1a6363]/20">
+                              <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <span className="text-[#1a6363] text-sm font-medium">
+                              Click to upload receipt
+                            </span>
+                            <span className="text-[#1a6363]/60 text-xs">
+                              Supports: JPG, PNG, PDF
+                            </span>
+                          </label>
+                        )}
+                      </div>
 
-                    {/* Verify Button */}
-                    <motion.button
-                      className={`
-                        w-full py-3 rounded-lg font-medium tracking-wider
-                        ${imagePreview 
-                          ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
-                          : 'bg-white/5 text-white/30 cursor-not-allowed'
-                        }
-                        transition-colors
-                      `}
-                      disabled={!imagePreview || isAnalyzing}
-                      onClick={handleVerification}
-                    >
-                      {isAnalyzing ? 'Verifying...' : 'Verify Quest'}
-                    </motion.button>
+                      {/* Verify Button */}
+                      <motion.button
+                        className={`
+                          w-full py-3 rounded-lg font-medium tracking-wider
+                          ${quest3ImagePreview 
+                            ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
+                            : 'bg-[#1a6363]/20 text-[#1a6363]/50 cursor-not-allowed'
+                          }
+                          transition-colors
+                        `}
+                        disabled={!quest3ImagePreview || quest3IsAnalyzing}
+                        onClick={handleQuest3Verification}
+                      >
+                        {quest3IsAnalyzing ? 'Verifying Receipt...' : 'Verify Purchase'}
+                      </motion.button>
+                    </div>
                   </>
                 )
               )}
