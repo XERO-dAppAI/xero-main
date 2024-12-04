@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Heart, Share2, Star, X } from 'lucide-react';
+import { Trophy, Heart, Share2, Star, X, Copy } from 'lucide-react';
 import game1 from '../../assets/game1.png';
 import game2 from '../../assets/game2.png';
 import game3 from '../../assets/game3.png';
@@ -60,6 +60,114 @@ const FloatingHeart = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
+// Update the getQuestContent function
+const getQuestContent = (gameId: string) => {
+  const referralCode = `XERO${Date.now().toString(36).toUpperCase()}`;
+  
+  switch (gameId) {
+    case '1':
+      return {
+        title: 'Verify Social Follow',
+        description: 'Join our community of food waste warriors! Follow us on X and Telegram to stay updated on the latest initiatives.',
+        buttons: [
+          {
+            title: 'Follow on X',
+            link: 'https://x.com/xerow_ai',
+            icon: (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            )
+          },
+          {
+            title: 'Join Telegram',
+            link: 'https://t.me/xerow_ai',
+            icon: (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.27-.48.74-.74 2.93-1.27 4.88-2.11 5.87-2.51 2.8-1.14 3.37-1.34 3.75-1.34.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+            )
+          }
+        ],
+        needsProof: true,
+        uploadText: 'Upload screenshot proof'
+      };
+    case '2':
+      return {
+        title: 'Share XERO',
+        description: 'Help us grow our community! Share your unique referral code and invite others to join our mission against food waste.',
+        referralCode,
+        shareMessage: `Join me in the fight against food waste with XERO! 
+
+We're building a community dedicated to reducing food waste through innovative solutions.
+
+Use my referral code: ${referralCode}
+
+Join here: https://xero.com/join`,
+        needsProof: false,
+        isReferralQuest: true
+      };
+    case '3':
+      return {
+        title: 'Market Flow Analysis',
+        description: 'Master the art of market analytics and demand prediction. Learn to read market patterns and optimize your inventory management.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '4':
+      return {
+        title: 'Dynamic Pricing Challenge',
+        description: 'Learn and implement dynamic pricing strategies for near-expiry items to minimize waste while maintaining profitability.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '5':
+      return {
+        title: 'Sustainability Practice',
+        description: 'Discover and implement sustainable practices in your business operations to reduce food waste and environmental impact.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '6':
+      return {
+        title: 'Resource Optimization',
+        description: 'Learn advanced techniques for optimizing resource allocation and stock management.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '7':
+      return {
+        title: 'Supply Chain Management',
+        description: 'Master the complexities of food supply chain management and implement efficient distribution strategies.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '8':
+      return {
+        title: 'Food Preservation Mastery',
+        description: 'Learn advanced food preservation techniques and implement them in your business operations.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '9':
+      return {
+        title: 'Community Building',
+        description: 'Build and strengthen local business networks to create an efficient food redistribution system.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    case '10':
+      return {
+        title: 'Zero Waste Achievement',
+        description: 'Complete the final challenge by implementing all learned strategies to achieve zero waste status.',
+        needsProof: true,
+        uploadText: 'Upload completion proof'
+      };
+    default:
+      return null;
+  };
+};
+
 export const League: React.FC = () => {
   const [currentGameIndex, setCurrentGameIndex] = useState(0);
   const [showGames, setShowGames] = useState(false);
@@ -79,12 +187,14 @@ export const League: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [isVerificationComplete, setIsVerificationComplete] = useState(false);
+  const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const games: Game[] = [
     {
       id: '1',
       title: 'Social Media Awakening',
-      description: 'Join the XERO Alliance! Your first quest: Connect with fellow traders on X and Telegram. Forge bonds that will shape your destiny in the world of decentralized commerce! 🌟⚔️',
+      description: 'Join the XERO Alliance in our quest to eliminate food waste! Your first mission: Connect with fellow food waste warriors on X and Telegram. Together, we\'ll forge a future where no food goes to waste! 🌟🍱',
       reward: '100 XEROW',
       rating: 8.83,
       episodes: 24,
@@ -93,18 +203,18 @@ export const League: React.FC = () => {
     },
     {
       id: '2',
-      title: 'Supply Chain Chronicles',
-      description: 'Build and optimize your supply chain empire',
-      reward: '100 XEROW',
+      title: 'Referral Sage',
+      description: 'Spread the word about XERO\'s mission! As food waste warriors, we need more allies in our quest. Share your unique referral code and help build our community of conscious traders! 🤝✨',
+      reward: '150 XEROW',
       rating: 8.62,
       episodes: 12,
       image: game2,
-      difficulty: 'Medium'
+      difficulty: 'Easy'
     },
     {
       id: '3',
-      title: 'Market Analysis Quest',
-      description: 'Analyze market trends and predict future patterns',
+      title: 'Market Flow Mastery',
+      description: 'Harness the power of market analytics to predict demand patterns! Become one with the flow of supply and demand to prevent overstock and reduce waste. The market whispers its secrets... 📊⚡',
       reward: '75 XEROW',
       rating: 9.05,
       episodes: 10,
@@ -113,8 +223,8 @@ export const League: React.FC = () => {
     },
     {
       id: '4',
-      title: 'Price Optimization Saga',
-      description: 'Master dynamic pricing strategies in real-time',
+      title: 'Price Harmony Saga',
+      description: 'Balance the delicate art of pricing near-expiry items! Your mission: Save food from waste while maintaining profit harmony. Master dynamic pricing techniques! 💫💰',
       reward: '120 XEROW',
       rating: 8.94,
       episodes: 18,
@@ -123,8 +233,8 @@ export const League: React.FC = () => {
     },
     {
       id: '5',
-      title: 'Sustainability Challenge',
-      description: 'Create eco-friendly business solutions',
+      title: 'Sustainability Champion',
+      description: 'Channel the energy of sustainable practices! Learn to transform potential food waste into valuable resources. Every morsel saved is a victory for our planet! 🌱🔮',
       reward: '90 XEROW',
       rating: 8.71,
       episodes: 15,
@@ -133,8 +243,8 @@ export const League: React.FC = () => {
     },
     {
       id: '6',
-      title: 'Resource Management',
-      description: 'Optimize resource allocation and efficiency',
+      title: 'Resource Sage',
+      description: 'Unlock the secrets of resource optimization! Master the mystical balance between stock levels and customer demand. Minimize waste, maximize impact! ⚖️✨',
       reward: '85 XEROW',
       rating: 8.88,
       episodes: 20,
@@ -143,8 +253,8 @@ export const League: React.FC = () => {
     },
     {
       id: '7',
-      title: 'Business Strategy Quest',
-      description: 'Develop winning business strategies',
+      title: 'Food Chain Warrior',
+      description: 'Embark on an epic quest through the supply chain! Battle inefficiencies and rescue food from the clutches of waste. Your strategy will reshape the future! ⚔️🍜',
       reward: '150 XEROW',
       rating: 9.12,
       episodes: 16,
@@ -153,8 +263,8 @@ export const League: React.FC = () => {
     },
     {
       id: '8',
-      title: 'Financial Planning Saga',
-      description: 'Master financial forecasting and planning',
+      title: 'Preservation Master',
+      description: 'Learn legendary techniques of food preservation! Master the ancient arts of storage and handling to extend food life. Every preserved item is a battle won! 🌟❄️',
       reward: '110 XEROW',
       rating: 8.79,
       episodes: 22,
@@ -163,8 +273,8 @@ export const League: React.FC = () => {
     },
     {
       id: '9',
-      title: 'Customer Experience',
-      description: 'Enhance customer satisfaction and loyalty',
+      title: 'Community Alliance',
+      description: 'Unite local businesses in the fight against waste! Build networks to share and redistribute surplus food. Together, we are stronger! 🤝🍱',
       reward: '95 XEROW',
       rating: 8.91,
       episodes: 14,
@@ -173,8 +283,8 @@ export const League: React.FC = () => {
     },
     {
       id: '10',
-      title: 'Innovation Quest',
-      description: 'Create innovative solutions for business challenges',
+      title: 'Zero Waste Legend',
+      description: 'The ultimate challenge awaits! Combine all your learned skills to achieve the legendary status of Zero Waste Master. Your legacy will inspire generations! 👑🌟',
       reward: '130 XEROW',
       rating: 9.15,
       episodes: 25,
@@ -264,6 +374,22 @@ export const League: React.FC = () => {
   };
 
   const handlePlayNow = (game: Game) => {
+    // Check if previous challenge is completed (except for first challenge)
+    const gameIndex = games.findIndex(g => g.id === game.id);
+    if (gameIndex > 0) {
+      const previousGame = games[gameIndex - 1];
+      if (!completedChallenges.has(previousGame.id)) {
+        toast.error('Complete the previous challenge first!');
+        return;
+      }
+    }
+
+    // Check if already completed
+    if (completedChallenges.has(game.id)) {
+      toast.success('Challenge already completed!');
+      return;
+    }
+
     setSelectedGame(game);
     setShowChallenge(true);
   };
@@ -272,20 +398,46 @@ export const League: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       setProofImage(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
   const handleVerification = async () => {
     setIsAnalyzing(true);
-    
-    // Quick verification animation (2 seconds)
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsVerified(true);
-    
-    // Show completion message
     await new Promise(resolve => setTimeout(resolve, 500));
     setIsAnalyzing(false);
     setIsVerificationComplete(true);
+    
+    // Add to completed challenges
+    if (selectedGame) {
+      setCompletedChallenges(prev => new Set([...prev, selectedGame.id]));
+    }
+  };
+
+  const handleReferralShare = () => {
+    const referralMessage = `🌟 Join me in the fight against food waste with XERO! 
+
+We're building a community of conscious traders working to reduce food waste through innovative solutions.
+
+Use my referral code: XERO${selectedGame?.id}${Date.now().toString(36)} to get started!
+
+Join here: https://xero.com/join
+`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Join XERO',
+        text: referralMessage,
+        url: 'https://xero.com/join'
+      });
+    } else {
+      navigator.clipboard.writeText(referralMessage);
+      toast.success('Referral message copied to clipboard!');
+    }
   };
 
   return (
@@ -587,8 +739,8 @@ export const League: React.FC = () => {
                           </span>
                         </div>
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          whileHover={{ scale: completedChallenges.has(game.id) ? 1 : 1.05 }}
+                          whileTap={{ scale: completedChallenges.has(game.id) ? 1 : 0.95 }}
                           className={`
                             relative px-6 py-2 
                             overflow-hidden
@@ -598,11 +750,17 @@ export const League: React.FC = () => {
                             font-medium 
                             tracking-wider
                             text-white
-                            ${game.difficulty === 'Easy' 
-                              ? 'bg-emerald-900/20 border-emerald-400/40' 
+                            ${completedChallenges.has(game.id)
+                              ? 'bg-gray-500/20 border-gray-400/40 cursor-not-allowed'
+                              : game.difficulty === 'Easy'
+                              ? 'bg-emerald-900/20 border-emerald-400/40'
                               : game.difficulty === 'Medium'
                               ? 'bg-amber-900/20 border-amber-400/40'
                               : 'bg-red-900/20 border-red-400/40'
+                            }
+                            ${!completedChallenges.has(games[games.findIndex(g => g.id === game.id) - 1]?.id) && game.id !== '1'
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
                             }
                             clip-path-polygon
                           `}
@@ -612,23 +770,32 @@ export const League: React.FC = () => {
                           }}
                           onClick={() => handlePlayNow(game)}
                         >
-                          {/* Windshield effect */}
-                          <div className="absolute inset-0 overflow-hidden">
-                            <motion.div
-                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                              animate={{
-                                x: ['-100%', '100%'],
-                              }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: "linear"
-                              }}
-                            />
-                          </div>
+                          {/* Windshield effect - only show if not completed */}
+                          {!completedChallenges.has(game.id) && (
+                            <div className="absolute inset-0 overflow-hidden">
+                              <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                animate={{
+                                  x: ['-100%', '100%'],
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "linear"
+                                }}
+                              />
+                            </div>
+                          )}
                           
                           {/* Button text */}
-                          <span className="relative z-10">Play Now</span>
+                          <span className="relative z-10">
+                            {completedChallenges.has(game.id) 
+                              ? 'Completed ✓' 
+                              : !completedChallenges.has(games[games.findIndex(g => g.id === game.id) - 1]?.id) && game.id !== '1'
+                              ? 'Locked 🔒'
+                              : 'Play Now'
+                            }
+                          </span>
                         </motion.button>
                       </div>
                     </div>
@@ -675,130 +842,177 @@ export const League: React.FC = () => {
               >
                 <X className="text-white/70" size={16} />
               </motion.button>
-              <h3 className="text-lg font-syne text-white">Verify Social Follow</h3>
+              <h3 className="text-lg font-syne text-white">
+                {getQuestContent(selectedGame.id)?.title}
+              </h3>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-6">
-              {/* Links */}
-              <div className="space-y-3">
-                      <a 
-                        href="https://x.com/xerow_ai" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/90"
-                >
-                  <div className="p-2 rounded-lg bg-[#1a6363]/20">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  </div>
-                  Follow on X
-                </a>
-                      <a 
-                        href="https://t.me/xerow_ai" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/90"
-                >
-                  <div className="p-2 rounded-lg bg-[#1a6363]/20">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.27-.48.74-.74 2.93-1.27 4.88-2.11 5.87-2.51 2.8-1.14 3.37-1.34 3.75-1.34.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                    </svg>
-                  </div>
-                  Join Telegram
-                      </a>
-                    </div>
+              {/* Description */}
+              <div className="bg-[#1a6363]/10 p-4 rounded-lg">
+                <p className="text-white/90 text-sm leading-relaxed">
+                  {getQuestContent(selectedGame.id)?.description}
+                </p>
+              </div>
 
-              {/* Upload Section */}
-              <div className="relative">
-                {proofImage ? (
-                  <div className="relative rounded-lg overflow-hidden aspect-video bg-black/50">
-                    <img 
-                      src={URL.createObjectURL(proofImage)} 
-                      alt="Proof" 
-                      className="w-full h-full object-contain"
-                    />
-                    
-                    {/* Scanning Animation */}
-                    {isAnalyzing && (
-                      <>
-                        <motion.div 
-                          className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 to-transparent"
-                          animate={{
-                            y: ['0%', '100%', '0%'],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "linear"
-                          }}
-                        />
-                        <div className="absolute inset-0 border-2 border-[#1a6363]/50">
-                          <motion.div
-                            className="absolute top-0 left-0 w-20 h-20"
-                            animate={{
-                              x: ['0%', '100%'],
-                              y: ['0%', '100%']
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              repeatType: "reverse",
-                              ease: "linear"
-                            }}
-                          >
-                            <div className="absolute top-0 left-0 w-full h-0.5 bg-[#1a6363]" />
-                            <div className="absolute top-0 right-0 w-0.5 h-full bg-[#1a6363]" />
-                          </motion.div>
-                        </div>
-                        
-                        {/* Analysis Text */}
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-sm text-[#1a6363] font-mono"
-                          >
-                            Analyzing proof... {isVerified ? '100%' : ''}
-                          </motion.div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-white/10 hover:border-[#1a6363]/50 transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                    />
-                    <div className="p-3 rounded-full bg-[#1a6363]/20">
-                      <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+              {getQuestContent(selectedGame.id)?.isReferralQuest ? (
+                // Referral Quest Content
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-4 rounded-lg">
+                    <div className="text-sm text-white/60 mb-2">Your Referral Code:</div>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 bg-black/20 px-3 py-2 rounded-lg text-[#1a6363] font-mono">
+                        {getQuestContent(selectedGame.id)?.referralCode}
+                      </code>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          const shareMessage = getQuestContent(selectedGame.id)?.shareMessage;
+                          if (shareMessage) {
+                            navigator.clipboard.writeText(shareMessage);
+                            toast.success('Referral message copied!');
+                            // Auto complete the quest when copied
+                            if (selectedGame) {
+                              setCompletedChallenges(prev => new Set([...prev, selectedGame.id]));
+                              setShowChallenge(false);
+                              setIsVerificationComplete(true);
+                            }
+                          }
+                        }}
+                        className="p-2 bg-[#1a6363]/20 rounded-lg text-[#1a6363]"
+                      >
+                        <Copy size={20} />
+                      </motion.button>
                     </div>
-                    <span className="text-white/70 text-sm">Upload screenshot proof</span>
-                  </label>
-                )}
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-lg">
+                    <div className="text-sm text-white/60 mb-2">Share Message:</div>
+                    <p className="text-white/90 text-sm whitespace-pre-line">
+                      {getQuestContent(selectedGame.id)?.shareMessage}
+                    </p>
+                  </div>
                 </div>
+              ) : selectedGame?.id === '1' ? (
+                // Social Media Quest Content
+                <div className="space-y-3">
+                  {getQuestContent('1')?.buttons?.map((button, index) => (
+                    <a 
+                      key={index}
+                      href={button.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/90"
+                    >
+                      <div className="p-2 rounded-lg bg-[#1a6363]/20">
+                        {button.icon}
+                      </div>
+                      {button.title}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                // Standard Quest Content with Upload
+                getQuestContent(selectedGame.id)?.needsProof && (
+                  <>
+                    <div>
+                      {imagePreview ? (
+                        <div className="relative rounded-lg overflow-hidden aspect-video">
+                          <img 
+                            src={imagePreview} 
+                            alt="Proof" 
+                            className="w-full h-full object-contain bg-black/50"
+                          />
+                          
+                          {/* Scanning Animation */}
+                          {isAnalyzing && (
+                            <>
+                              {/* Scanning line */}
+                              <motion.div 
+                                className="absolute inset-0 bg-gradient-to-b from-[#1a6363]/20 to-transparent"
+                                animate={{
+                                  y: ['0%', '100%', '0%'],
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "linear"
+                                }}
+                              />
+                              
+                              {/* Scanning corners */}
+                              <div className="absolute inset-0 border-2 border-[#1a6363]/50">
+                                <motion.div
+                                  className="absolute top-0 left-0 w-20 h-20"
+                                  animate={{
+                                    x: ['0%', '100%'],
+                                    y: ['0%', '100%']
+                                  }}
+                                  transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    repeatType: "reverse",
+                                    ease: "linear"
+                                  }}
+                                >
+                                  <div className="absolute top-0 left-0 w-full h-0.5 bg-[#1a6363]" />
+                                  <div className="absolute top-0 right-0 w-0.5 h-full bg-[#1a6363]" />
+                                </motion.div>
+                              </div>
+                              
+                              {/* Analysis Text */}
+                              <div className="absolute bottom-4 left-4 right-4">
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="text-sm text-[#1a6363] font-mono"
+                                >
+                                  Analyzing proof... {isVerified ? '100%' : ''}
+                                </motion.div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-white/10 hover:border-[#1a6363]/50 transition-colors cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                          <div className="p-3 rounded-full bg-[#1a6363]/20">
+                            <svg className="w-6 h-6 text-[#1a6363]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <span className="text-white/70 text-sm">
+                            {getQuestContent(selectedGame.id)?.uploadText}
+                          </span>
+                        </label>
+                      )}
+                    </div>
 
-              {/* Verify Button */}
-                <motion.button
-                  className={`
-                  w-full py-3 rounded-lg font-medium tracking-wider
-                    ${proofImage 
-                      ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
-                    : 'bg-white/5 text-white/30 cursor-not-allowed'
-                    }
-                    transition-colors
-                  `}
-                disabled={!proofImage || isAnalyzing}
-                  onClick={handleVerification}
-                >
-                  {isAnalyzing ? 'Verifying...' : 'Verify Follow'}
-                </motion.button>
+                    {/* Verify Button */}
+                    <motion.button
+                      className={`
+                        w-full py-3 rounded-lg font-medium tracking-wider
+                        ${imagePreview 
+                          ? 'bg-[#1a6363] text-white hover:bg-[#1a6363]/90' 
+                          : 'bg-white/5 text-white/30 cursor-not-allowed'
+                        }
+                        transition-colors
+                      `}
+                      disabled={!imagePreview || isAnalyzing}
+                      onClick={handleVerification}
+                    >
+                      {isAnalyzing ? 'Verifying...' : 'Verify Quest'}
+                    </motion.button>
+                  </>
+                )
+              )}
             </div>
           </motion.div>
         </motion.div>
