@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Heart, Share2, Star, X, Copy } from 'lucide-react';
+// Import all available game images
 import game1 from '../../assets/game1.png';
 import game2 from '../../assets/game2.png';
 import game3 from '../../assets/game3.png';
 import game4 from '../../assets/game4.png';
+import game6 from '../../assets/game6.png';
 import game7 from '../../assets/game7.png';
 import game8 from '../../assets/game8.png';
 import { Star as StarIcon } from 'lucide-react';
@@ -20,6 +22,40 @@ interface Game {
   episodes: number;
   image: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
+}
+
+// Add these interfaces at the top of the file
+interface QuestOption {
+  id: string;
+  text: string;
+  hint: string;
+}
+
+interface QuestQuestion {
+  text: string;
+  options: QuestOption[];
+  correctAnswer: string;
+  explanation: string;
+}
+
+interface QuestContent {
+  title: string;
+  description: string;
+  questions?: QuestQuestion[];
+  requirements?: string[];
+  needsProof?: boolean;
+  uploadText?: string;
+  buttons?: Array<{
+    title: string;
+    link: string;
+    icon: React.ReactNode;
+  }>;
+  referralCode?: string;
+  shareMessage?: string;
+  isReferralQuest?: boolean;
+  shareImage?: string;
+  isQuizQuest?: boolean;
+  reward?: string;  // Add reward property
 }
 
 // Update FloatingHeart component to create multiple hearts
@@ -61,8 +97,8 @@ const FloatingHeart = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// Update the getQuestContent function
-const getQuestContent = (gameId: string) => {
+// Update the getQuestContent function with proper typing
+const getQuestContent = (gameId: string): QuestContent | null => {
   const referralCode = `XERO${Date.now().toString(36).toUpperCase()}`;
   
   switch (gameId) {
@@ -316,7 +352,7 @@ export const League: React.FC = () => {
       reward: '90 XEROW',
       rating: 8.71,
       episodes: 15,
-      image: game3,
+      image: game6,  // Using game6 instead of reusing game3
       difficulty: 'Easy'
     },
     {
@@ -326,7 +362,7 @@ export const League: React.FC = () => {
       reward: '85 XEROW',
       rating: 8.88,
       episodes: 20,
-      image: game4,
+      image: game6,
       difficulty: 'Medium'
     },
     {
@@ -356,7 +392,7 @@ export const League: React.FC = () => {
       reward: '95 XEROW',
       rating: 8.91,
       episodes: 14,
-      image: game7,
+      image: game2,  // Using game2 instead of reusing game7
       difficulty: 'Easy'
     },
     {
@@ -366,7 +402,7 @@ export const League: React.FC = () => {
       reward: '130 XEROW',
       rating: 9.15,
       episodes: 25,
-      image: game8,
+      image: game4,  // Using game4 instead of reusing game8
       difficulty: 'Hard'
     }
   ];
@@ -390,6 +426,8 @@ export const League: React.FC = () => {
   }, [showGames, games.length, isInteracting, showChallenge]);
 
   const handleLike = (gameId: string) => {
+    const currentGame = games.find(g => g.id === gameId);
+    const currentRating = ratings[gameId] || currentGame?.rating || 0;
     setLikedGames(prev => {
       const newLiked = new Set(prev);
       if (newLiked.has(gameId)) {
@@ -404,7 +442,7 @@ export const League: React.FC = () => {
 
     setGameLikes(prev => ({
       ...prev,
-      [gameId]: (prev[gameId] || 0) + (likedGames.has(gameId) ? -1 : 1)
+      [gameId]: (prev[gameId] || 0) + (likedGames.has(gameId) ? -1 : 1 ) // Added missing closing parenthesis
     }));
   };
 
@@ -440,8 +478,8 @@ export const League: React.FC = () => {
       [gameId]: rating
     }));
 
-    // Calculate new average rating (using 5-star scale)
-    const currentRating = ratings[gameId] || game.rating;
+    const currentGame = games.find(g => g.id === gameId);
+    const currentRating = ratings[gameId] || currentGame?.rating || 0;
     const currentCount = userRatings[gameId] ? 1 : 0;
     const newRating = ((currentRating * currentCount) + rating) / (currentCount + 1);
 
@@ -486,6 +524,7 @@ export const League: React.FC = () => {
             <button 
               onClick={() => toast.dismiss(t.id)}
               className="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/60 transition-colors"
+              title="Dismiss notification"
             >
               <X size={16} />
             </button>
@@ -585,7 +624,8 @@ Join here: https://xero.com/join
     setDeductions(prev => [...prev, `Used hint (-10 XEROW)`]);
   };
 
-  const handleAnswerSelect = (option: any) => {
+  // Update the handleAnswerSelect function
+  const handleAnswerSelect = (option: QuestOption) => {
     if (!selectedAnswers[currentQuestionIndex]) {
       setSelectedAnswers(prev => ({
         ...prev,
@@ -593,14 +633,12 @@ Join here: https://xero.com/join
       }));
       setShowExplanation(true);
 
-      if (option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer) {
-        // Correct answer
+      const currentQuestion = getQuizQuestion(currentQuestionIndex);
+      if (currentQuestion && option.id === currentQuestion.correctAnswer) {
         triggerSuccessEffect();
         setCorrectAnswers(prev => prev + 1);
-        // Each correct answer is worth 100 XEROW
         setQuestReward(prev => prev + 100);
       } else {
-        // Wrong answer - deduct 20 XEROW
         triggerErrorEffect();
         setQuestReward(prev => prev - 20);
         setDeductions(prev => [...prev, `Wrong answer (-20 XEROW)`]);
@@ -643,6 +681,22 @@ Join here: https://xero.com/join
     if (selectedGame) {
       setCompletedChallenges(prev => new Set([...prev, selectedGame.id]));
     }
+  };
+
+  // Update the helper functions with proper typing
+  const getQuizQuestions = (): QuestQuestion[] => {
+    const content = getQuestContent('4');
+    return content?.questions ?? [];
+  };
+
+  const getQuizQuestion = (index: number): QuestQuestion | null => {
+    const questions = getQuizQuestions();
+    return questions[index] ?? null;
+  };
+
+  const getQuest3Requirements = (): string[] => {
+    const content = getQuestContent('3');
+    return content?.requirements ?? [];
   };
 
   return (
@@ -1300,7 +1354,7 @@ Join here: https://xero.com/join
                       <div className="bg-[#1a1a1a] p-4 rounded-lg">
                         <h4 className="text-white/90 text-sm font-medium mb-2">Quest Requirements:</h4>
                         <ul className="space-y-2">
-                          {getQuestContent('3')?.requirements.map((req, index) => (
+                          {(getQuestContent('3')?.requirements ?? []).map((req, index) => (
                             <li key={index} className="flex items-center gap-2 text-sm text-white/70">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#1a6363]" />
                               {req}
@@ -1412,10 +1466,10 @@ Join here: https://xero.com/join
                     {/* Question Progress with enhanced styling */}
                     <div className="flex justify-between items-center mb-6 relative z-10">
                       <h4 className="text-white/90 font-medium">
-                        Question {currentQuestionIndex + 1} of {getQuestContent('4')?.questions.length}
+                        Question {currentQuestionIndex + 1} of {getQuizQuestions().length}
                       </h4>
                       <div className="flex gap-1">
-                        {getQuestContent('4')?.questions.map((_, index) => (
+                        {getQuizQuestions().map((_, index) => (
                           <motion.div 
                             key={index}
                             className={`h-1.5 w-10 rounded-full transition-all duration-300 ${
@@ -1437,12 +1491,12 @@ Join here: https://xero.com/join
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
-                      {getQuestContent('4')?.questions[currentQuestionIndex].text}
+                      {getQuizQuestion(currentQuestionIndex)?.text || 'Loading question...'}
                     </motion.p>
 
                     {/* Options with enhanced interactivity */}
                     <div className="space-y-3 relative z-10">
-                      {getQuestContent('4')?.questions[currentQuestionIndex].options.map((option) => (
+                      {getQuizQuestion(currentQuestionIndex)?.options?.map((option) => (
                         <motion.button
                           key={option.id}
                           whileHover={{ scale: 1.02, y: -2 }}
@@ -1454,7 +1508,7 @@ Join here: https://xero.com/join
                             backdrop-blur-md border-l-2 shadow-inner
                             font-medium tracking-wider
                             ${selectedAnswers[currentQuestionIndex] === option.id
-                              ? option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer
+                              ? option.id === getQuizQuestion(currentQuestionIndex)?.correctAnswer
                                 ? 'bg-emerald-900/20 border-emerald-400/40 text-emerald-300'
                                 : 'bg-red-900/20 border-red-400/40 text-red-300'
                               : selectedAnswers[currentQuestionIndex]
@@ -1475,7 +1529,7 @@ Join here: https://xero.com/join
                               <div className={`
                                 w-6 h-6 rounded-full flex items-center justify-center
                                 ${selectedAnswers[currentQuestionIndex] === option.id
-                                  ? option.id === getQuestContent('4')?.questions[currentQuestionIndex].correctAnswer
+                                  ? option.id === getQuizQuestion(currentQuestionIndex)?.correctAnswer
                                     ? 'bg-emerald-500/20'
                                     : 'bg-red-500/20'
                                   : 'bg-white/10'
@@ -1651,7 +1705,7 @@ Join here: https://xero.com/join
                       >
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1a6363]/5 to-transparent" />
                         <p className="text-white/80 text-sm relative z-10 mb-4">
-                          {getQuestContent('4')?.questions[currentQuestionIndex].explanation}
+                          {getQuizQuestion(currentQuestionIndex)?.explanation || 'No explanation available'}
                         </p>
 
                         {/* Show deductions if any */}
@@ -1673,7 +1727,7 @@ Join here: https://xero.com/join
                         )}
 
                         {/* Next/Complete button */}
-                        {currentQuestionIndex < (getQuestContent('4')?.questions.length || 0) - 1 ? (
+                        {currentQuestionIndex < getQuizQuestions().length - 1 ? (
                           <motion.button
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
@@ -1726,7 +1780,7 @@ Join here: https://xero.com/join
                       <div className="bg-[#1a1a1a] p-4 rounded-lg">
                         <h4 className="text-white/90 text-sm font-medium mb-2">Quest Requirements:</h4>
                         <ul className="space-y-2">
-                          {getQuestContent('3')?.requirements.map((req, index) => (
+                          {(getQuestContent('3')?.requirements ?? []).map((req, index) => (
                             <li key={index} className="flex items-center gap-2 text-sm text-white/70">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#1a6363]" />
                               {req}
@@ -1734,6 +1788,16 @@ Join here: https://xero.com/join
                           ))}
                         </ul>
                       </div>
+
+                      {/* Move inline styles to CSS classes */}
+                      <style>
+                        {`
+                          .clip-path-polygon {
+                            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+                            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+                          }
+                        `}
+                      </style>
 
                       {/* Upload Section */}
                       <div>

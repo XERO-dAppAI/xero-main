@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { OnboardingLayout } from './components/layout/OnboardingLayout';
 import { VerifyIdentityStep } from './pages/steps/VerifyIdentityStep';
@@ -9,16 +9,8 @@ import { BusinessDashboard } from './pages/dashboard/BusinessDashboard';
 import { StepProvider } from './context/StepContext';
 import './index.css';
 import { Toaster } from 'react-hot-toast';
-import { Onboarding } from './components/onboarding/Onboarding';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-
-  if (isAuthenticated && !hasCompletedOnboarding) {
-    return <Onboarding />;
-  }
-
   return (
     <StepProvider>
       <Router>
